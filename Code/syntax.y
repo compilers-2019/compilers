@@ -118,6 +118,7 @@ DefList: Def DefList { $$ = newNode(yylineno, 42, 2, $1, $2); }
 ;
 Def: Specifier DecList SEMI { $$ = newNode(yylineno, 43, 3, $1, $2, $3); }
 | Specifier error { $$ = newNode(yylineno, 43, 2, $1, $2); errorInfo(yytext); }
+| Specifier error SEMI { $$ = newNode(yylineno, 43, 3, $1, $2, $3); errorInfo(yytext); }
 ;
 DecList: Dec { $$ = newNode(yylineno, 44, 1, $1); }
 | Dec COMMA DecList { $$ = newNode(yylineno, 44, 3, $1, $2, $3); }
