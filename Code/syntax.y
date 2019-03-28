@@ -60,7 +60,8 @@ ExtDefList: ExtDef ExtDefList { $$ = newNode(yylineno, 28, 2, $1, $2); }
 ExtDef: Specifier ExtDecList SEMI { $$ = newNode(yylineno, 29, 3, $1, $2, $3); }
 | Specifier SEMI { $$ = newNode(yylineno, 29, 2, $1, $2); }
 | Specifier FunDec CompSt { $$ = newNode(yylineno, 29, 3, $1, $2, $3); }
-| error SEMI { $$ = newNode(yylineno, 29, 2, $1, $2); errorInfo(yytext); }
+| Specifier error { $$ = newNode(yylineno, 29, 2, $1, $2); errorInfo(yytext); }
+/*| error SEMI { $$ = newNode(yylineno, 29, 2, $1, $2); errorInfo("aaa"); }*/
 ;
 ExtDecList: VarDec { $$ = newNode(yylineno, 30, 1, $1); }
 | VarDec COMMA ExtDecList { $$ = newNode(yylineno, 30, 3, $1, $2, $3); }
@@ -83,7 +84,7 @@ Tag: ID { $$ = newNode(yylineno, 34, 1, $1); }
 /* Declarators */
 VarDec: ID { $$ = newNode(yylineno, 35, 1, $1); }
 | VarDec LB INT RB { $$ = newNode(yylineno, 35, 4, $1, $2, $3, $4); }
-| VarDec LB error RB { $$ = newNode(yylineno, 35, 4, $1, $2, $3, $4); printError("Uncorrect INT here"); }
+| VarDec LB error RB { $$ = newNode(yylineno, 35, 4, $1, $2, $3, $4); errorInfo(yytext); }
 ;
 FunDec: ID LP VarList RP { $$ = newNode(yylineno, 36, 4, $1, $2, $3, $4); }
 | ID LP RP { $$ = newNode(yylineno, 36, 3, $1, $2, $3); }
@@ -96,7 +97,6 @@ ParamDec: Specifier VarDec { $$ = newNode(yylineno, 38, 2, $1, $2); }
 
 /* Statements */
 CompSt: LC DefList StmtList RC { $$ = newNode(yylineno, 39, 4, $1, $2, $3, $4); }
-| LC DefList StmtList error { $$ = newNode(yylineno, 39, 4, $1, $2, $3, $4); yyerror("Missing \"}\""); }
 ;
 StmtList: Stmt StmtList { $$ = newNode(yylineno, 40, 2, $1, $2); }
 | { $$ = newNode(yylineno, 40, 0); }
@@ -107,7 +107,9 @@ Stmt: Exp SEMI { $$ = newNode(yylineno, 41, 2, $1, $2); }
 | IF LP Exp RP Stmt %prec LOWER_THAN_ELSE { $$ = newNode(yylineno, 41, 5, $1, $2, $3, $4, $5); }
 | IF LP Exp RP Stmt ELSE Stmt { $$ = newNode(yylineno, 41, 7, $1, $2, $3, $4, $5, $6, $7); }
 | WHILE LP Exp RP Stmt { $$ = newNode(yylineno, 41, 5, $1, $2, $3, $4, $5); }
-| RETURN error SEMI { $$ = newNode(yylineno, 41, 3, $1, $2, $3); printError("Missing object to return"); }
+| RETURN error SEMI { $$ = newNode(yylineno, 41, 3, $1, $2, $3); errorInfo(yytext); }
+| RETURN Exp error { $$ = newNode(yylineno, 41, 3, $1, $2, $3); errorInfo(yytext); }
+| Exp error { $$ = newNode(yylineno, 41, 2, $1, $2); errorInfo(yytext); }
 ;
 
 /* Local Definitions */
@@ -115,7 +117,7 @@ DefList: Def DefList { $$ = newNode(yylineno, 42, 2, $1, $2); }
 | { $$ = newNode(yylineno, 42, 0); }
 ;
 Def: Specifier DecList SEMI { $$ = newNode(yylineno, 43, 3, $1, $2, $3); }
-| Specifier error { printError("Missing \";\" before here"); }
+| Specifier error { $$ = newNode(yylineno, 43, 2, $1, $2); errorInfo(yytext); }
 ;
 DecList: Dec { $$ = newNode(yylineno, 44, 1, $1); }
 | Dec COMMA DecList { $$ = newNode(yylineno, 44, 3, $1, $2, $3); }
@@ -143,7 +145,8 @@ Exp: Exp ASSIGNOP Exp { $$ = newNode(yylineno, 46, 3, $1, $2, $3); }
 | ID { $$ = newNode(yylineno, 46, 1, $1); }
 | INT { $$ = newNode(yylineno, 46, 1, $1); }
 | FLOAT { $$ = newNode(yylineno, 46, 1, $1); }
-| Exp LB error RB { $$ = newNode(yylineno, 46, 4, $1, $2, $3, $4); errorInfo(yytext);  }
+| error RP { $$ = newNode(yylineno, 46, 2, $1, $2); errorInfo(yytext); }
+| error RB { $$ = newNode(yylineno, 46, 2, $1, $2); errorInfo(yytext); }
 ;
 Args: Exp COMMA Args { $$ = newNode(yylineno, 47, 3, $1, $2, $3); }
 | Exp { $$ = newNode(yylineno, 47, 1, $1); }
@@ -158,20 +161,16 @@ int main() {
 */
 
 void errorInfo(const char* info) {
-		char error[30] = "syntax error, near \"";
+		char error[30] = "syntax error, before \"";
 		strcat(error, info);
 		strcat(error, "\"");
-		printError(error);
-}
-
-void printError(const char *msg) {
-		printf("%s\n", msg);
 		signal = false;
-		printf("Error type B at Line %d: %s\n", yylineno, msg);
+		printf("Error type B at Line %d: %s\n", yylineno, error);
+
 }
 
 void yyerror(const char *msg) {
-		//printf("%s\n", msg);
+		printf("%s\n", msg);
 		//signal = false;
 		//printf("Error type B at Line %d: %s\n", yylineno, msg);
 }

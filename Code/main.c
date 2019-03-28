@@ -2,9 +2,9 @@
 #include <stdbool.h>
 #include "syntaxtree.h"
 
-#ifdef YY_DEBUG
-extern int yydebug;
-#endif
+//#ifdef YY_DEBUG
+//extern int yydebug;
+//#endif
 
 //extern int yylineno;
 extern struct TreeNode* root;
@@ -25,9 +25,9 @@ int main(int argc, char** argv) {
 				return 1;
 		}
 		yyrestart(f);
-#ifdef YY_DEBUG
-		yydebug = 1;
-#endif
+//#ifdef YY_DEBUG
+//		yydebug = 1;
+//#endif
 		yyparse();
 		if(signal)
 				printTree();
