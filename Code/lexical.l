@@ -21,8 +21,8 @@
 %option yylineno
 digit [0-9]
 letter [_a-zA-Z]
-efloat (({digit}+\.{digit}*)|({digit}*\.(digit}+))[Ee][+-]?{digit}+
-float ({digit}+\.[digit]+)|efloat
+efloat (({digit}+\.{digit}*)|({digit}*\.{digit}+))[Ee][+-]?{digit}+
+float ({digit}+\.{digit}+)|efloat
 int ([1-9][0-9]*)|0
 id [_a-zA-Z][_a-zA-Z0-9]*
 bool true|false|TRUE|FALSE
