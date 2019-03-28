@@ -118,7 +118,6 @@ DefList: Def DefList { $$ = newNode(yylineno, 42, 2, $1, $2); }
 ;
 Def: Specifier DecList SEMI { $$ = newNode(yylineno, 43, 3, $1, $2, $3); }
 | Specifier error { $$ = newNode(yylineno, 43, 2, $1, $2); errorInfo(yytext); }
-| Specifier error SEMI { $$ = newNode(yylineno, 43, 3, $1, $2, $3); errorInfo(yytext); }
 ;
 DecList: Dec { $$ = newNode(yylineno, 44, 1, $1); }
 | Dec COMMA DecList { $$ = newNode(yylineno, 44, 3, $1, $2, $3); }
@@ -146,6 +145,7 @@ Exp: Exp ASSIGNOP Exp { $$ = newNode(yylineno, 46, 3, $1, $2, $3); }
 | ID { $$ = newNode(yylineno, 46, 1, $1); }
 | INT { $$ = newNode(yylineno, 46, 1, $1); }
 | FLOAT { $$ = newNode(yylineno, 46, 1, $1); }
+| Exp LB error RB { $$ = newNode(yylineno, 46, 4, $1, $2, $3, $4); errorInfo(yytext);  }
 | error RP { $$ = newNode(yylineno, 46, 2, $1, $2); errorInfo(yytext); }
 | error RB { $$ = newNode(yylineno, 46, 2, $1, $2); errorInfo(yytext); }
 ;
@@ -171,7 +171,7 @@ void errorInfo(const char* info) {
 }
 
 void yyerror(const char *msg) {
-		printf("%s\n", msg);
+		//printf("%s\n", msg);
 		//signal = false;
 		//printf("Error type B at Line %d: %s\n", yylineno, msg);
 }
