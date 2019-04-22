@@ -59,6 +59,7 @@ ExtDefList: ExtDef ExtDefList { $$ = newNode(yylineno, 28, 2, $1, $2); }
 ;
 ExtDef: Specifier ExtDecList SEMI { $$ = newNode(yylineno, 29, 3, $1, $2, $3); }
 | Specifier SEMI { $$ = newNode(yylineno, 29, 2, $1, $2); }
+|	Specifier FunDec SEMI	{$$=newNode(yylineno,29,3,$1,$2,$3);}
 | Specifier FunDec CompSt { $$ = newNode(yylineno, 29, 3, $1, $2, $3); }
 | Specifier error { $$ = newNode(yylineno, 29, 2, $1, $2); errorInfo(yytext); }
 /*| error SEMI { $$ = newNode(yylineno, 29, 2, $1, $2); errorInfo("aaa"); }*/
