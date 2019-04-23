@@ -6,37 +6,68 @@ unsigned int hash_pjw(char* name)
 	for( ; *name; ++name)
 	{
 		val = (val << 2) + *name;
-		if (i = val & ~0x3fff)
-			val = (val ^ (i >> 12)) & 0x3fff;
+		if (i = val & ~HASH_LENGTH)
+			val = (val ^ (i >> 12)) & HASH_LENGTH;
 	}
 	return val;
 }
 
-//检查类型
-//检查参数
-//检查重定义
-//建立符号表
-//检查符号
-//建立函数表
-//检查函数
-
-/* non-terminal function*/
-/*void Program(struct TreeNode *p)
-{
-	ExtDefList(p->child);
+void start(TreeNode r) {
+		init();
+		Program(r);
 }
-void ExtDefList(struct TreeNode *p)
-{
-	struct TreeNode *children=p->child;
-	if(children!=NULL)
-	{
-		ExtDef(children);
-		ExtDefList(children->next);
-	}
 
-}*/
-/*definition of variables*/
-/*void ExtDef(struct TreeNode *p)
-{	
+void init() {
+		for(int i = 0; i < HASH_LENGTH; i++) {
+				symtable[i] = NULL;
+				func_table[i] = NULL;
+		}
+}
 
-}*/
+void insert_sym_table(SymNode n) {
+		unsigned int num = hash_pjw(n->name);
+		if(sym_table[num] == null)
+				sym_table[num] = n;
+		else {
+				SymNode s = sym_table[num];
+				while(s->hash_next != NULL)
+						s = s->hash_next;
+				s->hash_next = n;
+		}
+}
+
+void insert_func_table(FuncNode n) {
+		unsigned int num = hash_pjw(n->name);
+		if(func_table[num] == null)
+				func_table[num] = n;
+		else {
+				FuncNode f = func_table[num];
+				while(f->hash_next != NULL)
+						f = f->hash_next;
+				f->hash_next = n;
+		}
+}
+
+SymNode check_sym_table(char* name) {
+		unsigned int num = hash_pjw(name);
+		SymNode s = sym_table[num];
+		while(s != NULL) {
+				if(strcmp(s->name, name) == 0)
+						return s;
+				s = s->hash_next;
+		}
+		return NULL;
+}
+
+FuncNode check_func_table(char* name) {
+		unsigned int num = hash_pjw(name);
+		FuncNode f = func_table[num];
+		while(f != NULL) {
+				if(strcmp(f->name, name) == 0)
+						return f;
+				f = f->hash_next;
+		}
+		return NULL;
+}
+
+
