@@ -21,7 +21,7 @@ unsigned int hash_pjw(char* name)
 //检查函数
 
 /* non-terminal function*/
-void Program(struct TreeNode *p)
+/*void Program(struct TreeNode *p)
 {
 	ExtDefList(p->child);
 }
@@ -34,9 +34,9 @@ void ExtDefList(struct TreeNode *p)
 		ExtDefList(children->next);
 	}
 
-}
+}*/
 /*definition of variables*/
-void ExtDef(struct TreeNode *p)
+/*void ExtDef(struct TreeNode *p)
 {	
 
-}
+}*/

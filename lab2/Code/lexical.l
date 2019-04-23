@@ -6,7 +6,7 @@
 		#include <stdbool.h>
 		#include "syntaxtree.h"
 		extern bool signal;
-		extern struct TreeNode* newNode(int no, int tp, int childno, ...);
+		extern TreeNode newNode(int no, int tp, int childno, ...);
 		//#include "syntaxtree.h"
 		//extern struct TreeNode* root;
 		//extern struct TreeNode* current;

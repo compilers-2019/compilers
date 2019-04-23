@@ -83,7 +83,7 @@ union YYSTYPE
 {
 #line 18 "./syntax.y" /* yacc.c:1909  */
 
-		struct TreeNode* type_tree;
+		struct TreeNode_* type_tree;
 
 #line 89 "./syntax.tab.h" /* yacc.c:1909  */
 };

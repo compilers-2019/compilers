@@ -3,7 +3,7 @@
 		#include "syntaxtree.h"
 		//#define YYERROR_VERBOSE 1
 		extern int yylineno;
-		extern struct TreeNode* root;
+		extern TreeNode root;
 		extern bool signal;
 		//void yyerror(char *msg, int no);
 		extern void errorInfo(const char* msg);
@@ -16,7 +16,7 @@
 
 /* declared types */
 %union {
-		struct TreeNode* type_tree;
+		struct TreeNode_* type_tree;
 }
 
 /* declared tokens */

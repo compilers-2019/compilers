@@ -1,7 +1,5 @@
 #include "syntaxtree.h"
 
-extern struct TreeNode* root;
-
 char* str[] = {
 		"INT", "FLOAT", "ID", "SEMI", "COMMA", "ASSIGNOP", "RELOP", "PLUS", 
 		"MINUS", "STAR", "DIV", "AND", "OR", "DOT", "NOT", "TYPE", "LP", 
@@ -11,9 +9,9 @@ char* str[] = {
 		"ParamDec", "CompSt", "StmtList", "Stmt", "DefList", "Def", "DecList", 
 		"Dec", "Exp", "Args" };
 
-struct TreeNode* newNode(int no, int tp, int childno, ...) {
+TreeNode newNode(int no, int tp, int childno, ...) {
 		//printf("New Node: %s, no = %d\n", str[tp], childno);
-		struct TreeNode* t = (struct TreeNode*)malloc(sizeof(struct TreeNode));
+		TreeNode t = (TreeNode)malloc(sizeof(struct TreeNode_));
 		t->type = tp;
 		t->lineno = no;
 		t->child = NULL;
@@ -37,9 +35,9 @@ struct TreeNode* newNode(int no, int tp, int childno, ...) {
 				}
 		}
 		else {
-				struct TreeNode* p;
+				TreeNode p;
 				while(childno > 0) {
-						struct TreeNode* q = va_arg(argptr, struct TreeNode*);
+						TreeNode q = va_arg(argptr, TreeNode);
 						//printf("q: %s\n", str[q->type]);
 						if(t->child == NULL)
 								t->child = q;
@@ -54,7 +52,7 @@ struct TreeNode* newNode(int no, int tp, int childno, ...) {
 		return t;
 }
 
-void printNode(struct TreeNode* t, int n) {
+void printNode(TreeNode t, int n) {
 		if(t == NULL)
 				return;
 		if((t->type > _WHILE) && (t->child == NULL)) {

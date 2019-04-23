@@ -19,109 +19,22 @@ enum Type {
 		_DEC, _EXP, _ARGS 
 };
 
-struct TreeNode {
+typedef struct TreeNode_* TreeNode;
+
+struct TreeNode_ {
 		enum Type type;
 		char unit[20];
 		int lineno;
 		float val;
 		char name[20];
-		struct TreeNode* child;
-		struct TreeNode* next;
-		struct TreeNode* parent;
+		TreeNode child;
+		TreeNode next;
+		//struct TreeNode* parent;
 };
 
-struct TreeNode* root;
-struct TreeNode* newNode(int no, int tp, int childno, ...);
-void printNode(struct TreeNode* t, int n);
+TreeNode root;
+TreeNode newNode(int no, int tp, int childno, ...);
+void printNode(TreeNode t, int n);
 void printTree();
-
-
-/*void init() {
-		//printf("start...\n");
-		struct TreeNode *t = (struct TreeNode*)malloc(sizeof(struct TreeNode));
-		t->type = 0;
-		strcpy(t->unit, "Program");
-		t->lineno = 1;
-		t->child = NULL;
-		t->next = NULL;
-		t->parent = NULL;
-		root = t;
-		current = t;
-		printf("init...\n");
-}
-
-void next(int no) {
-		printf("addChild...\n");
-		struct TreeNode *c = (struct TreeNode*)malloc(sizeof(struct TreeNode));
-		c->child = NULL;
-		c->next = NULL;
-		c->parent = current;
-		current->child = c;
-		for(int i = 1; i < no; i++) {
-				struct TreeNode *p = (struct TreeNode*)malloc(sizeof(struct TreeNode));
-				p->child = NULL;
-				p->next = NULL;
-				p->parent = current;
-				c->next = p;
-				c = c->next;
-		}
-		current = current->child;
-		printf("addChild finish...\n");
-}
-
-void nextNode() {
-		printf("nextNode...\n");
-		while(current->next == NULL)
-				current = current->parent;
-		current = current->next;
-		printf("nextNode finish...\n");
-}
-
-void next(int no) {
-		addChild(no);
-		//nextNode();		
-}
-
-void setN(char* u, int l) {
-		printf("setN...\n");
-		current->type = 0;
-		strcpy(current->unit, u);
-		current->lineno = l;
-}
-
-void setID(char* n, int l) {
-		printf("setID...\n");
-		current->type = 1;
-		strcpy(current->unit, "ID");
-		strcpy(current->name, n);
-		current->lineno = l;
-		nextNode();
-}
-
-void setINT(int v, int l) {
-		printf("setINT...\n");
-		current->type = 1;
-		strcpy(current->unit, "INT");
-		current->val = v;
-		current->lineno = l;
-		nextNode();
-}
-
-void setFLOAT(int v, int l) {
-		printf("setFLOAT...\n");
-		current->type = 1;
-		strcpy(current->unit, "FLOAT");
-		current->val = v;
-		current->lineno = l;
-		nextNode();
-}
-
-void setT(char* u, int l) {
-		printf("setT...\n");
-		current->type = 1;
-		strcpy(current->unit, u);
-		current->lineno = l;
-		nextNode();
-}*/
 
 #endif
