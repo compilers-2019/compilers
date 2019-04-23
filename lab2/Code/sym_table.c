@@ -70,4 +70,63 @@ FuncNode check_func_table(char* name) {
 		return NULL;
 }
 
+void Program(TreeNode pro) {
+		// Program -> ExtDefList
+		ExtDefList(pro->child);
+}
 
+void ExtDefList(TreeNode extl) {
+		if(extl->child != NULL) {
+				// ExtDefList -> ExtDef ExtDefList
+				ExtDef(extl->child);
+				ExtDefList(extl->child->next);
+		}
+		// ExtDefList -> empty
+}
+
+void ExtDef(TreeNode ext) {
+		//Specifier
+		SymNode sn = Specifier(ext->child);
+		if(sn) {
+				TreeNode second = ext->child->next;
+				if(strcmp(second->unit, "ExtDecList") == 0) 
+						// ExtDef -> Specifier ExtDecList SEMI
+						ExtDecList(second, sn);
+				else {
+						// ExtDef -> Specifier FunDec CompSt
+						FuncNode fn = FunDec(second, sn);
+						CompSt(second->next, sn);
+						if(!check_func_table(fn->name))
+								insert_func_table(fn);
+						else
+								printf("Error type 4 at line %d: Redefined function \"%s\".", fn->lineno, fn->name);
+				}
+		}
+		// ExtDef -> Specifier SEMI
+}
+
+void ExtDecList(TreeNode extl, SymNode sn) {
+		// ExtDecList -> VarDec
+		VarDec(extl->child, sn, IN_BASIC);
+		if(extl->child->next)
+				// ExtDecList -> VarDec COMMA ExtDecList
+				ExtDecList(extl->child->next->next, sn);
+}
+
+SymNode Specifier(TreeNode spec) {
+		SymNode res;
+		TreeNode first = spec->child;
+		if(strcmp(first->unit, "StructSpecifier")) 
+				res = StructSpecifier(first);
+		else {
+				res = malloc(sizeof(struct SymNode_));
+				Type t = malloc(sizeof(struct Type_));
+				t->kind = BASIC;
+				if(strcmp(first->name, "int"))
+						t->u.basic = 0;
+				else
+						t->u.basic = 1;
+				res->type = t;
+		}
+		return res;
+}

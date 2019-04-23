@@ -1,9 +1,15 @@
+#ifndef __SYM_TABLE__
+#define __SYM_TABLE__
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include "syntaxtree.h"
 
 #define HASH_LENGTH 0x3fff
+#define IN_BASIC 0
+#define IN_STRUCT 1
+#define IN_PARAM 2
 
 enum { BASIC, ARRAY, STRUCT } Type;
 
@@ -14,7 +20,7 @@ typedef struct FuncNode_* FuncNode;
 struct Type_ {
 		enum { BASIC, ARRAY, STRUCT } kind;
 		union {
-				bool basic;
+				int basic;
 				struct {
 						SymNode arrlist;
 						Type element;
@@ -31,7 +37,7 @@ struct SymNode_ {
 		SymNode hash_next;
 		SymNode param_next;
 		SymNode struct_next;
-}'
+};
 
 struct FuncNode_ {
 		Type returnType;
@@ -56,4 +62,10 @@ SymNode check_sym_table(char* name);
 FuncNode check_func_table(char* name);
 
 void Program(TreeNode pro);
+void ExtDefList(TreeNode extl);
+void ExtDef(TreeNode ext);
+void ExtDecList(TreeNode extl, SymNode sn);
 
+SymNode Specifier(TreeNode spec);
+
+#endif
