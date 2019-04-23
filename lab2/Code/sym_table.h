@@ -56,9 +56,15 @@ unsigned int hash_pjw(char* name);
 void start(TreeNode r);
 void init();
 
+int check_type(SymNode a, SymNode b);
+int check_params(SymNode a,SymNode b);
+int use_func(SymNode a, SymNode b);
+void print_type(SymNode a);
+
 void insert_sym_table(SymNode n);
 void insert_func_table(FuncNode n);
 SymNode check_sym_table(char* name);
+SymNode check_stru_table(char* name);
 FuncNode check_func_table(char* name);
 
 void Program(TreeNode pro);
@@ -67,5 +73,22 @@ void ExtDef(TreeNode ext);
 void ExtDecList(TreeNode extl, SymNode sn);
 
 SymNode Specifier(TreeNode spec);
+SymNode StructSpecifier(TreeNode stru);
 
+SymNode VarDec(TreeNode var, SymNode spec, int flag);
+FuncNode FunDec(TreeNode func,SymNode spec);
+SymNode VarList(TreeNode varl);
+SymNode ParamDec(TreeNode par);
+
+void CompSt(TreeNode comp, SymNode spec);
+void StmtList(TreeNode stmtl, SymNode spec);
+void Stmt(TreeNode stm,SymNode spec);
+
+SymNode DefList( TreeNode defl, int flag);
+SymNode Def( TreeNode def, int flag);
+SymNode DecList( TreeNode decl, SymNode spec, int flag);
+SymNode Dec( TreeNode dec,SymNode spec, int flag);
+
+SymNode Exp(TreeNode exp);
+SymNode Args(TreeNode arg);
 #endif
