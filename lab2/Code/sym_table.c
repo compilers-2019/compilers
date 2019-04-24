@@ -251,13 +251,13 @@ void ExtDecList(TreeNode extl, SymNode sn) {
 SymNode Specifier(TreeNode spec) {
 		SymNode res;//SymNode res = malloc(sizeof(struct SymNode_));?
 		TreeNode first = spec->child;
-		if(strcmp(first->unit, "StructSpecifier"))//返回0?取反
+		if(strcmp(first->unit, "StructSpecifier")==0)//返回0?取反
 				res = StructSpecifier(first);
 		else {
 				res = malloc(sizeof(struct SymNode_));
 				Type t = malloc(sizeof(struct Type_));
 				t->kind = BASIC;
-				if(strcmp(first->name, "int"))//==0
+				if(strcmp(first->name, "int")==0)//==0
 						t->u.basic = 0;
 				else//float
 						t->u.basic = 1;
