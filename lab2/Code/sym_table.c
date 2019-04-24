@@ -23,6 +23,91 @@ void init() {
 		func_table[i] = NULL;
 	}
 }
+void print_type(SymNode a)
+{
+	for(SymNode p = a; p != NULL;p = p->param_next)
+	{
+		if(p->type->kind == BASIC)
+		{
+			if(p->type->u.basic == 0)
+				printf("int");
+			else
+				printf("float");
+		}
+		else if(p->type->kind == ARRAY)
+		{
+			print_type(p->type->u.array.arrlist);
+			for(Type q = p->type->u.array.element; q->u.array.element !=NULL; q = q->u.array.element)
+				printf("[]");
+		}
+		else if(p->type->kind == STRUCT)
+		{
+			printf("struct %s",p->name);
+		}
+		if(p->param_next != NULL)
+			printf(",");
+	}
+}
+
+int use_func(SymNode a, SymNode b)//调用函数
+{
+	if(a == NULL && b == NULL)
+		return 1;
+	int count_a = 0;
+	int count_b = 0;
+	for(SymNode p = a; p != NULL;p = p->param_next)
+		count_a++;
+	for(SymNode p = b; p != NULL;p = p->param_next)
+		count_b++;
+	if(count_a != count_b)
+		return 0;
+	SymNode p = a; SymNode q = b;
+	for(; p != NULL&&q != NULL;p = p->param_next, q = q->param_next)
+	{
+		if(!match_type(p,q))
+			return 0;
+	}	 
+	return 1;
+}
+
+bool match_param(SymNode a,SymNode b)//参数匹配
+{
+	if(a==NULL&&b==NULL)
+		return true;
+	if(a==NULL||b==NULL)
+		return false;
+	if(match_type(a->type,b->type))
+		return match_param(a->struct_next,b->struct_next);
+	else
+		return false;
+}
+
+bool match_type(Type a,Type b)//检查类型（类型匹配）
+{
+	if(a->kind!=b->kind)
+	{
+		return false;
+	}
+	else if(a->kind == BASIC)//basic
+	{
+		if(a->u.basic != b->u.basic)//只有一项
+			return false;
+	}
+	else if(a->kind==STRUCT)
+	{
+		if(a->u.structure->name==NULL||b->u.structure->name==NULL)
+		{
+			return paramEqual(t1->u.structure,t2->u.structure);								
+		}
+		if(strcmp(a->u.structure->name,b->u.structure->name)!=0)
+			return false;
+	}
+	else(a->kind == ARRAY)//array
+	{
+		return match_type(a->u.array.element,b->u.array.element);	
+	}
+	return true;
+}
 
 void insert_sym_table(SymNode n) {
 	unsigned int num = hash_pjw(n->name);
@@ -360,5 +445,235 @@ SymNode Dec(TreeNode dec, SymNode sn, int flag) {
 		SymNode exp = Exp(first->next->next);
 		printf("Error type 15 at line %d: initialized variable in field \"%s\".\n", first->lineno, res->name);
 	}
+	return res;
+}
+
+SymNode Exp(TreeNode exp)
+{
+	TreeNode first = exp->child;
+	TreeNode second = first->next;
+	SymNode res = malloc(sizeof(struct SymNode_));
+	//Exp->Exp DOT ID
+	if(strcmp(first->unit,"Exp")==0 && strcmp(second->unit,"DOT") == 0)
+	{
+		SymNode t = Exp(first);
+		if(t == NULL)
+			return NULL;
+		if(t->type->kind != STRUCT)//13.对非结构体型变量使用“.”操作符
+		{
+			printf( "Error type 13 at line %d: Illegal use of \".\".\n", first->lineno );
+			return NULL;
+		}
+		//14.访问结构体中未定义过的域
+		SymNode p=t->type->u.structure->struct_next;
+		while(p->name!=NULL)
+		{
+			if(strcmp(p->name, second->next->name)==0)
+			{
+				res = p;
+				res->CanBeAss = true;//CanBeAss是否能被赋值
+				return res;
+			}
+			p=p->struct_next;
+		}
+		printf( "Error type 14 at line %d: Non-existent field \"%s\".\n", first->lineno, second->next->name );
+		return NULL;
+	}
+	else if(strcmp(first->unit,"Exp")==0)
+	{
+		TreeNode third = second->next;
+
+		SymNode t = Exp(first);
+		SymNode type1 = Exp(third);
+		if(t == NULL || type1 == NULL)//
+			return NULL;
+		//Exp->Exp ASSIGNOP Exp
+		if(strcmp(second->unit, "ASSIGNOP") == 0)
+		{
+			//t在赋值号左边，type1在赋值号后边
+			if(!t->CanBeAss )//赋值号左边出现一个只有右值的表达式
+				printf( "Error type 6 at line %d: The left-hand side of an assignment must be a variable.\n", first->lineno );
+			if(!match_type(t->type,type1->type))//赋值号两边的表达式类型不匹配
+				printf( "Error type 5 at line %d: Type mismatched for assignment.\n", first->lineno );
+		}
+		//Exp->Exp PLUS Exp| Exp -> Exp MINUS Exp| Exp -> Exp STAR Exp|Exp -> Exp DIV Exp|Exp -> Exp RELOP Exp
+
+		else if(strcmp(second->unit,"PLUS") == 0||strcmp(second->unit, "MINUS") == 0||strcmp(second->unit,"STAR")==0||strcmp(second->unit,"DIV")==0||strcmp(second->unit,"RELOP")==0)
+		{
+			if(t->type->kind != BASIC||type1->type->kind != BASIC)//操作数类型与操作符不匹配
+			{
+				printf( "Error type 7 at line %d: Type mismatched for operands.\n", first->lineno );
+				return NULL;
+			}
+			if(t->type->u.basic != type1->type->u.basic)//操作数类型不匹配
+			{
+				printf( "Error type 7 at line %d: Type mismatched for operands.\n", first->lineno );
+				return NULL;
+			}
+			res->type = t->type;
+			if(strcmp(second->unit,"RELOP") == 0)
+				res->type->u.basic = 0;
+			res->CanBeAss = false;
+			return res;
+		}
+		//Exp : Exp AND Exp
+		//Exp : Exp OR Exp
+		else if(strcmp(second->unit,"AND")==0||strcmp(second->unit,"OR") == 0)
+		{
+			if(t->type->kind != BASIC||type1->type->kind != BASIC)
+			{
+				printf( "Error type 7 at line %d: Type mismatched for operands.\n", first->lineno );
+				return NULL;
+			}
+			if(t->type->u.basic != INT_TYPE || type1->type->u.basic != INT_TYPE)
+			{
+				printf( "Error type 7 at line %d: Type mismatched for operands.\n", first->lineno );
+				return NULL;
+			}
+			res->type = t->type;
+			res->CanBeAss = false;
+			return res;
+		}
+		//Exp : Exp LB Exp RB
+		else if(strcmp(second->unit,"LB") == 0)
+		{
+			//printf("unit: %s \n", first->unit);
+			if(t->type->kind != ARRAY)
+			{
+				printf( "Error type 10 at line %d: \"%s\" is not an array.\n", first->lineno, t->name );
+				return NULL;
+			}
+			if(type1->type->kind != BASIC || type1->type->u.basic != 0)
+			{
+				printf( "Error type 12 at line %d: \"%s\" is not an integer.\n", first->lineno , third->child->name );
+				return NULL;
+			}
+			Type p = t->type->u.array.element;
+			res->type = p;
+			if(p->u.array.element == NULL)
+			{
+				res = p->u.array.arrlist;
+			}
+			res->CanBeAss = true;
+			return res;
+		}
+	}
+	else if(strcmp(first->name, "LP") == 0)
+	{
+		return Exp(first->next);
+	}
+	//Exp : MINUS Exp
+	//Exp : NOT Exp
+	else if(strcmp(first->name, "MINUS") == 0 || strcmp(first->name, "NOT") == 0)
+	{ 
+		SymNode type1 = Exp(first);
+		if(type1 == NULL)
+			return NULL;
+		if(type1->type->kind != BASIC)
+		{
+			printf( "Error type 7 at line %d: Type mismatched for operands.\n", first->lineno );
+			return NULL;
+		}
+		if(type1->type->u.basic != 0)
+		{
+			printf( "Error type 7 at line %d: Type mismatched for operands.\n", first->lineno );
+			return NULL;
+		}
+		res->type = type1->type;
+		res->CanBeAss = false;
+		return res;
+		
+	}
+	else if(strcmp(first->name, "ID") == 0)
+	{
+		//printf("name: %s \n", first->name);
+		//Exp : ID
+		if(second == NULL)
+		{
+			res = check_sym_table(first->name);
+			if(res == NULL)
+			{
+				printf( "Error type 1 at line %d: Undefined variable \"%s\".\n", first->lineno, first->name );
+				return NULL;
+			}
+			res->CanBeAss = true;
+			return res;	
+		}
+
+		TreeNode third = second->next;
+		//Exp : ID LP Args RP
+		//Exp : ID LP RP
+		FuncNode func = check_func_table(first->name);
+		SymNode sym = check_sym_table(first->name);
+		if(sym != NULL&&func == NULL)
+		{
+			printf( "Error type 11 at line %d: \"%s\" is not a function.\n", first->lineno, first->name );
+			return NULL;
+		}
+		if(sym == NULL&&func == NULL)
+		{
+			printf( "Error type 2 at line %d: Undefined function \"%s\".\n", first->lineno, first->name );
+			return NULL;
+		}
+		if(strcmp(third->name, "Args")==0)
+		{
+			SymNode params = Args(third);
+			//printf("name: %s \n", first->name);
+			//printf("name: %d \n", use_func(params,func->Params));
+			if(use_func(params,func->Params) == 0)//调用函数
+			{
+				printf( "Error type 9 at line %d: Function \"%s(", first->lineno, func->name );
+				print_type( func->Params );
+				printf( ")\" is not applicable for arguments \"(");
+				print_type(params);
+				printf( ")\".\n" );
+			}
+		}
+		else
+		{
+			if(func->Params != NULL)
+			{
+				printf( "Error type 9 at line %d: Function \"%s(", first->lineno, func->name );
+				print_type( func->Params );
+				printf( ")\" is not applicable for arguments \"()\".\n" );
+			}
+		}
+		res = func->returnType;
+		res->CanBeAss = false;
+		return res;
+	}
+	else if(strcmp(first->name, "INT") == 0)
+	{	
+		//Exp : INT
+		Type type = malloc(sizeof(struct Type_));
+		type->kind = BASIC;
+		type->u.basic = 0;
+		res->type = type;
+		res->CanBeAss = false;
+		return res;
+	}
+	else if(strcmp(first->name, "FLOAT") == 0)
+	{
+		//Exp : FLOAT
+		Type type = malloc(sizeof(struct Type_));
+		type->kind = BASIC;
+		type->u.basic = 1;
+		res->type = type;
+		res->CanBeAss = false;
+		return res;
+	}
+	return NULL;
+}
+
+SymNode Args(TreeNode arg)
+{
+	SymNode res=Exp(arg->child);
+	TreeNode second=arg->child->next;
+	//Args->Exp COMMA Args
+	if(second!= NULL)
+	{
+		res->param_next = Args(second->next);
+	}
+	//Args->Exp
 	return res;
 }

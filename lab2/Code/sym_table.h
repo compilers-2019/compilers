@@ -35,6 +35,7 @@ struct SymNode_ {
 	Type type;
 	int lineno;
 	char* name;
+	bool CanBeAss;
 	SymNode hash_next;
 	SymNode param_next;
 	SymNode struct_next;
@@ -58,6 +59,7 @@ void start(TreeNode r);
 void init();
 
 bool match_type(Type a, Type b);
+bool match_param(SymNode a,SymNode b);
 
 void insert_sym_table(SymNode n);
 void insert_func_table(FuncNode n);
