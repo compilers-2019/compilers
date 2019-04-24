@@ -12,8 +12,6 @@
 #define IN_PARAM 2
 #define IN_ARRAY 3
 
-enum { BASIC, ARRAY, STRUCT } Type;
-
 typedef struct Type_* Type;
 typedef struct SymNode_* SymNode;
 typedef struct FuncNode_* FuncNode;
@@ -58,6 +56,8 @@ unsigned int hash_pjw(char* name);
 void start(TreeNode r);
 void init();
 
+void print_type(SymNode a);
+int use_func(SymNode a, SymNode b);
 bool match_type(Type a, Type b);
 bool match_param(SymNode a,SymNode b);
 

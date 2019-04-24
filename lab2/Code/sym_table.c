@@ -19,7 +19,7 @@ void start(TreeNode r) {
 
 void init() {
 	for(int i = 0; i < HASH_LENGTH; i++) {
-		symtable[i] = NULL;
+		sym_table[i] = NULL;
 		func_table[i] = NULL;
 	}
 }
@@ -64,7 +64,7 @@ int use_func(SymNode a, SymNode b)//调用函数
 	SymNode p = a; SymNode q = b;
 	for(; p != NULL&&q != NULL;p = p->param_next, q = q->param_next)
 	{
-		if(!match_type(p,q))
+		if(!match_type(p->type,q->type))
 			return 0;
 	}	 
 	return 1;
@@ -97,12 +97,12 @@ bool match_type(Type a,Type b)//检查类型（类型匹配）
 	{
 		if(a->u.structure->name==NULL||b->u.structure->name==NULL)
 		{
-			return paramEqual(t1->u.structure,t2->u.structure);								
+			return match_param(a->u.structure,b->u.structure);								
 		}
 		if(strcmp(a->u.structure->name,b->u.structure->name)!=0)
 			return false;
 	}
-	else(a->kind == ARRAY)//array
+	else//array
 	{
 		return match_type(a->u.array.element,b->u.array.element);	
 	}
@@ -111,7 +111,7 @@ bool match_type(Type a,Type b)//检查类型（类型匹配）
 
 void insert_sym_table(SymNode n) {
 	unsigned int num = hash_pjw(n->name);
-	if(sym_table[num] == null)
+	if(sym_table[num] == NULL)
 		sym_table[num] = n;
 	else {
 		SymNode s = sym_table[num];
@@ -123,7 +123,7 @@ void insert_sym_table(SymNode n) {
 
 void insert_func_table(FuncNode n) {
 	unsigned int num = hash_pjw(n->name);
-	if(func_table[num] == null)
+	if(func_table[num] == NULL)
 		func_table[num] = n;
 	else {
 		FuncNode f = func_table[num];
@@ -264,7 +264,7 @@ char* OptTag(TreeNode opt) {
 
 SymNode VarDec(TreeNode vdec, SymNode sn, int flag) {
 	TreeNode first = vdec->child;
-	SymNode res = malloc(sizeof(SymNode_));
+	SymNode res = malloc(sizeof(struct SymNode_));
 	if(strcmp(first->unit, "ID") == 0) {
 		// VarDec -> ID
 		res->name = malloc(strlen(first->name));
@@ -408,7 +408,8 @@ SymNode DefList(TreeNode defl, int flag) {
 		if(def == NULL)
 			return NULL;
 		SymNode res = DefList(second, flag);
-		SymNode s = def;
+		SymNode p = def;
+	
 		while(p->struct_next != NULL)
 			p = p->struct_next;
 		p->struct_next = res;
@@ -439,7 +440,7 @@ SymNode Dec(TreeNode dec, SymNode sn, int flag) {
 	// Dec -> VarDec
 	TreeNode first = dec->child;
 	SymNode res = VarDec(first, sn, flag);
-	if(second != NULL && flag == IN_STRUCT) {
+	if(first->next != NULL && flag == IN_STRUCT) {
 		// Dec -> VarDec ASSIGNOP Exp
 		// But it seems to be illegal to initialize VarDec in one structure...
 		SymNode exp = Exp(first->next->next);
@@ -525,7 +526,7 @@ SymNode Exp(TreeNode exp)
 				printf( "Error type 7 at line %d: Type mismatched for operands.\n", first->lineno );
 				return NULL;
 			}
-			if(t->type->u.basic != INT_TYPE || type1->type->u.basic != INT_TYPE)
+			if(t->type->u.basic != 0 || type1->type->u.basic != 0)
 			{
 				printf( "Error type 7 at line %d: Type mismatched for operands.\n", first->lineno );
 				return NULL;
@@ -619,11 +620,11 @@ SymNode Exp(TreeNode exp)
 		{
 			SymNode params = Args(third);
 			//printf("name: %s \n", first->name);
-			//printf("name: %d \n", use_func(params,func->Params));
-			if(use_func(params,func->Params) == 0)//调用函数
+			//printf("name: %d \n", use_func(params,func->params));
+			if(use_func(params,func->params) == 0)//调用函数
 			{
 				printf( "Error type 9 at line %d: Function \"%s(", first->lineno, func->name );
-				print_type( func->Params );
+				print_type( func->params );
 				printf( ")\" is not applicable for arguments \"(");
 				print_type(params);
 				printf( ")\".\n" );
@@ -631,10 +632,10 @@ SymNode Exp(TreeNode exp)
 		}
 		else
 		{
-			if(func->Params != NULL)
+			if(func->params != NULL)
 			{
 				printf( "Error type 9 at line %d: Function \"%s(", first->lineno, func->name );
-				print_type( func->Params );
+				print_type( func->params );
 				printf( ")\" is not applicable for arguments \"()\".\n" );
 			}
 		}
