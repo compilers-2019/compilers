@@ -538,7 +538,6 @@ SymNode Exp(TreeNode exp)
 		//Exp : Exp LB Exp RB
 		else if(strcmp(second->unit,"LB") == 0)
 		{
-			//printf("unit: %s \n", first->unit);
 			if(t->type->kind != ARRAY)
 			{
 				printf( "Error type 10 at line %d: \"%s\" is not an array.\n", first->lineno, t->name );
@@ -587,7 +586,6 @@ SymNode Exp(TreeNode exp)
 	}
 	else if(strcmp(first->name, "ID") == 0)
 	{
-		//printf("name: %s \n", first->name);
 		//Exp : ID
 		if(second == NULL)
 		{
@@ -619,8 +617,6 @@ SymNode Exp(TreeNode exp)
 		if(strcmp(third->name, "Args")==0)
 		{
 			SymNode params = Args(third);
-			//printf("name: %s \n", first->name);
-			//printf("name: %d \n", use_func(params,func->params));
 			if(use_func(params,func->params) == 0)//调用函数
 			{
 				printf( "Error type 9 at line %d: Function \"%s(", first->lineno, func->name );
