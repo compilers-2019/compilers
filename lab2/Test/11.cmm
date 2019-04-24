@@ -1,0 +1,6 @@
+int a(int c);
+int main()
+{
+	int i;
+	i(10);
+}
