@@ -136,6 +136,7 @@ void insert_func_table(FuncNode n) {
 SymNode check_sym_table(char* name) {
 	unsigned int num = hash_pjw(name);
 	SymNode s = sym_table[num];
+	
 	while(s != NULL) {
 		if(strcmp(s->name, name) == 0)
 			return s;
@@ -157,12 +158,14 @@ FuncNode check_func_table(char* name) {
 
 void Program(TreeNode pro) {
 	// Program -> ExtDefList
+	printf("Program -> ExtDefList\n");
 	ExtDefList(pro->child);
 }
 
 void ExtDefList(TreeNode extl) {
 	if(extl->child != NULL) {
 		// ExtDefList -> ExtDef ExtDefList
+		printf("Program -> ExtDefList\n");
 		ExtDef(extl->child);
 		ExtDefList(extl->child->next);
 	}
@@ -176,9 +179,11 @@ void ExtDef(TreeNode ext) {
 		TreeNode second = ext->child->next;
 		if(strcmp(second->unit, "ExtDecList") == 0) 
 			// ExtDef -> Specifier ExtDecList SEMI
+			printf("ExtDef -> Specifier ExtDecList SEMI\n");
 			ExtDecList(second, sn);
 		else {
 			// ExtDef -> Specifier FunDec CompSt
+			printf("ExtDef -> Specifier FunDec CompSt\n");
 			FuncNode fn = FunDec(second, sn);
 			CompSt(second->next, sn);
 			if(!check_func_table(fn->name))
@@ -192,9 +197,11 @@ void ExtDef(TreeNode ext) {
 
 void ExtDecList(TreeNode extl, SymNode sn) {
 	// ExtDecList -> VarDec
+	print("ExtDecList -> VarDec\n");
 	VarDec(extl->child, sn, IN_BASIC);
 	if(extl->child->next)
 		// ExtDecList -> VarDec COMMA ExtDecList
+		printf("ExtDecList -> VarDec COMMA ExtDecList\n");
 		ExtDecList(extl->child->next->next, sn);
 }
 
@@ -203,9 +210,11 @@ SymNode Specifier(TreeNode spec) {
 	TreeNode first = spec->child;
 	if(strcmp(first->unit, "StructSpecifier") == 0)
 		// Specifier -> StructSpecifier
+		printf("Specifier -> StructSpecifier\n");
 		res = StructSpecifier(first);
 	else {
 		// Specifier -> TYPE
+		printf("Specifier -> TYPE\n");
 		res = malloc(sizeof(struct SymNode_));
 		Type t = malloc(sizeof(struct Type_));
 		t->kind = BASIC;
@@ -224,6 +233,7 @@ SymNode StructSpecifier(TreeNode sspec) {
 	SymNode res;
 	if(strcmp(second->unit, "OptTag") == 0) {
 		// StructSpecifier -> STRUCT OptTag LC DefList RC
+		print("StructSpecifier -> STRUCT OptTag LC DefList RC\n");
 		res = malloc(sizeof(struct SymNode_));
 		Type type = malloc(sizeof(struct Type_));
 		type->kind = STRUCT;
@@ -249,9 +259,10 @@ SymNode StructSpecifier(TreeNode sspec) {
 	}
 	else {
 		// StructSpecifier -> STRUCT Tag
+		printf("StructSpecifier -> STRUCT Tag\n");
 		res = check_sym_table(second->child->name);
 		if((res == NULL) || (res->type->kind != STRUCT))
-			printf("Error type 17 at Lint %d: Undefined structure \"%s\".\n", second->lineno, second->child->name);
+			printf("Error type 17 at Line %d: Undefined structure \"%s\".\n", second->lineno, second->child->name);
 	}
 	return res;
 }
@@ -267,6 +278,7 @@ SymNode VarDec(TreeNode vdec, SymNode sn, int flag) {
 	SymNode res = malloc(sizeof(struct SymNode_));
 	if(strcmp(first->unit, "ID") == 0) {
 		// VarDec -> ID
+		printf("VarDec -> ID\n");
 		res->name = malloc(strlen(first->name));
 		strcpy(res->name, first->name);
 		res->lineno = first->lineno;
@@ -283,6 +295,7 @@ SymNode VarDec(TreeNode vdec, SymNode sn, int flag) {
 	}
 	else {
 		// VarDec -> VarDec LB INT RB
+		printf("VarDec -> VarDec LB INT RB\n");
 		SymNode s = VarDec(first, sn, IN_ARRAY);
 		res->name = malloc(strlen(s->name));
 		strcpy(res->name, s->name);
@@ -293,11 +306,12 @@ SymNode VarDec(TreeNode vdec, SymNode sn, int flag) {
 	}
 	if(flag == IN_BASIC) {
 		if(check_sym_table(res->name) != NULL)
-			printf("Error type 3 at Line %d: Redefined variable \"%s\".\n", res->name, res->lineno);
+			printf("Error type 3 at Line %d: Redefined variable \"%s\".\n", res->lineno, res->name);
 		else {
 			insert_sym_table(res);
 		}
 	}
+	return res;
 }
 
 FuncNode FunDec(TreeNode fdec, SymNode sn) {
@@ -310,8 +324,10 @@ FuncNode FunDec(TreeNode fdec, SymNode sn) {
 	res->lineno = first->lineno;
 	res->returnType = sn;
 	// FunDec -> ID LP RP
+	printf("FunDec -> ID LP RP\n");
 	if(strcmp(third->name, "VarList") == 0) 
 		// FunDec -> ID LP VarList RP
+		printf("FunDec -> ID LP VarList RP\n");
 		res->params = VarList(third);
 	return res;
 }
@@ -320,8 +336,10 @@ SymNode VarList(TreeNode varl) {
 	TreeNode first = varl->child;
 	SymNode res = ParamDec(first);
 	// VarList -> ParamDec
+	printf("VarList -> ParamDec\n");
 	if(first->next != NULL) {
 		// VarList -> ParamDec COMMA VarList
+		printf("VarList -> ParamDec COMMA VarList\n");
 		res->param_next = VarList(first->next->next);
 	}
 	return res;
@@ -329,6 +347,7 @@ SymNode VarList(TreeNode varl) {
 
 SymNode ParamDec(TreeNode pdec) {
 	// ParamDec -> Specifier VarDec
+	printf("ParamDec -> Specifier VarDec\n");
 	TreeNode first = pdec->child;
 	TreeNode second = first->next;
 	
@@ -336,7 +355,7 @@ SymNode ParamDec(TreeNode pdec) {
 	SymNode res = VarDec(second, spec, IN_PARAM);
 	res->param_next = NULL;
 	if(check_sym_table(res->name) != NULL)
-		printf("Error type 3 at Line %d: Redefined variable \"%s\".\n", res->name, res->lineno);
+		printf("Error type 3 at Line %d: Redefined variable \"%s\".\n", res->lineno, res->name);
 	else {
 		insert_sym_table(res);
 	}
@@ -345,6 +364,7 @@ SymNode ParamDec(TreeNode pdec) {
 
 void CompSt(TreeNode comp, SymNode sn) {
 	// CompSt -> LC DefList StmtList RC
+	printf("CompSt -> LC DefList StmtList RC\n");
 	TreeNode second = comp->child->next;
 	TreeNode third = second->next;
 	DefList(second, IN_BASIC);
@@ -354,6 +374,7 @@ void CompSt(TreeNode comp, SymNode sn) {
 void StmtList(TreeNode stmtl, SymNode sn) {
 	if(stmtl->child != NULL) {
 		// StmtList -> Stmt StmtList
+		printf("StmtList -> Stmt StmtList\n");
 		Stmt(stmtl->child, sn);
 		StmtList(stmtl->child->next, sn);
 	}
@@ -362,33 +383,39 @@ void StmtList(TreeNode stmtl, SymNode sn) {
 
 void Stmt(TreeNode stmt, SymNode sn) {
 	TreeNode first = stmt->child;
-	if(strcmp(first->unit, "Exp") == 0) {
+	if(strcmp(first->unit, "Exp") == 0) {	
 		// Stmt -> Exp SEMI
+		printf("Stmt -> Exp SEMI\n");
 		Exp(first);
 	}
 	else if(strcmp(first->unit, "CompSt")) {
 		// Stmt -> CompSt
+		printf("Stmt -> CompSt\n");
 		CompSt(first, sn);
 	}
 	else if(strcmp(first->unit, "RETURN")) {
 		// Stmt -> RETURN Exp SEMI
+		printf("Stmt -> RETURN Exp SEMI\n");
 		SymNode returnType = Exp(first->next);
 		if(!match_type(returnType->type, sn->type))
 			printf("Error type 8 at Line %d: Type mismatched for return.\n", stmt->lineno);
 	}
 	else if(strcmp(first->unit, "IF")) {
 		// Stmt -> IF LP Exp RP Stmt
+		printf("Stmt -> IF LP Exp RP Stmt\n");
 		TreeNode third = first->next->next;
 		TreeNode fifth = third->next->next;
 		SymNode exp = Exp(third);
 		Stmt(fifth,sn);
 		if(fifth->next != NULL) {
 			// Stmt -> IF LP Exp RP Stmt ELSE Stmt
+			printf("Stmt -> IF LP Exp RP Stmt ELSE Stmt\n");
 			Stmt(fifth->next->next, sn);
 		}
 	}
 	else if(strcmp(first->unit, "WHILE")) {
 		// Stmt -> WHILE LP Exp RP Stmt
+		printf("Stmt -> WHILE LP Exp RP Stmt\n");
 		TreeNode third = first->next->next;
 		TreeNode fifth = third->next->next;
 		SymNode exp = Exp(third);
@@ -399,9 +426,11 @@ void Stmt(TreeNode stmt, SymNode sn) {
 SymNode DefList(TreeNode defl, int flag) {
 	if(defl->child == NULL)
 		// DefList -> empty
+		printf("DefList -> empty\n");
 		return NULL;
 	else {
 		// DefList -> Def DefList
+		printf("DefList -> Def DefList\n");
 		TreeNode first = defl->child;
 		TreeNode second = first->next;
 		SymNode def = Def(first, flag);
@@ -419,6 +448,7 @@ SymNode DefList(TreeNode defl, int flag) {
 
 SymNode Def(TreeNode def, int flag) {
 	// Def -> Specifier DecList SEMI
+	printf("Def -> Specifier DecList SEMI\n");
 	TreeNode first = def->child;
 	TreeNode second = first->next;
 	SymNode spec = Specifier(first);
@@ -427,10 +457,12 @@ SymNode Def(TreeNode def, int flag) {
 
 SymNode DecList(TreeNode decl, SymNode sn, int flag) {
 	// DecList -> Dec
+	printf("DecList -> Dec\n");
 	TreeNode first = decl->child;
 	SymNode res = Dec(first, sn, flag);
 	if(first->next != NULL) {
 		// DecList -> Dec COMMA DecList
+		printf("DecList -> Dec COMMA DecList\n");
 		res->struct_next = DecList(first->next->next, sn, flag);
 	}
 	return res;
@@ -438,10 +470,12 @@ SymNode DecList(TreeNode decl, SymNode sn, int flag) {
 
 SymNode Dec(TreeNode dec, SymNode sn, int flag) {
 	// Dec -> VarDec
+	printf("Dec -> VarDec\n");
 	TreeNode first = dec->child;
 	SymNode res = VarDec(first, sn, flag);
 	if(first->next != NULL && flag == IN_STRUCT) {
 		// Dec -> VarDec ASSIGNOP Exp
+		printf("Dec -> VarDec ASSIGNOP Exp\n");
 		// But it seems to be illegal to initialize VarDec in one structure...
 		SymNode exp = Exp(first->next->next);
 		printf("Error type 15 at line %d: initialized variable in field \"%s\".\n", first->lineno, res->name);
@@ -454,9 +488,94 @@ SymNode Exp(TreeNode exp)
 	TreeNode first = exp->child;
 	TreeNode second = first->next;
 	SymNode res = malloc(sizeof(struct SymNode_));
-	//Exp->Exp DOT ID
-	if(strcmp(first->unit,"Exp")==0 && strcmp(second->unit,"DOT") == 0)
+	
+	
+	
+	if(strcmp(first->unit,"Exp")==0)
 	{
+		TreeNode third = second->next;
+
+		SymNode t = Exp(first);
+		SymNode type1 = Exp(third);
+		if(t == NULL || type1 == NULL)//
+			return NULL;
+		//Exp->Exp ASSIGNOP Exp
+		if(strcmp(second->unit, "ASSIGNOP") == 0)
+		{
+			printf("Exp->Exp ASSIGNOP Exp\n");
+			//t在赋值号左边，type1在赋值号后边
+			if(!t->CanBeAss )//赋值号左边出现一个只有右值的表达式
+				printf( "Error type 6 at line %d: The left-hand side of an assignment must be a variable.\n", first->lineno );
+			if(!match_type(t->type,type1->type))//赋值号两边的表达式类型不匹配
+				printf( "Error type 5 at line %d: Type mismatched for assignment.\n", first->lineno );
+		}
+		//Exp->Exp PLUS Exp| Exp -> Exp MINUS Exp| Exp -> Exp STAR Exp|Exp -> Exp DIV Exp|Exp -> Exp RELOP Exp
+
+		else if(strcmp(second->unit,"PLUS") == 0||strcmp(second->unit, "MINUS") == 0||strcmp(second->unit,"STAR")==0||strcmp(second->unit,"DIV")==0||strcmp(second->unit,"RELOP")==0)
+		{
+			printf("Exp->Exp PLUS Exp| Exp -> Exp MINUS Exp| Exp -> Exp STAR Exp|Exp -> Exp DIV Exp|Exp -> Exp RELOP Exp\n");
+			if(t->type->kind != BASIC||type1->type->kind != BASIC)//操作数类型与操作符不匹配
+			{
+				printf( "Error type 7 at line %d: Type mismatched for operands.\n", first->lineno );
+				return NULL;
+			}
+			if(t->type->u.basic != type1->type->u.basic)//操作数类型不匹配
+			{
+				printf( "Error type 7 at line %d: Type mismatched for operands.\n", first->lineno );
+				return NULL;
+			}
+			res->type = t->type;
+			if(strcmp(second->unit,"RELOP") == 0)
+				res->type->u.basic = 0;
+			res->CanBeAss = false;
+			return res;
+		}
+		//Exp : Exp AND Exp
+		//Exp : Exp OR Exp
+		else if(strcmp(second->unit,"AND")==0||strcmp(second->unit,"OR") == 0)
+		{
+			printf("Exp AND Exp||Exp : Exp OR Exp\n");
+			if(t->type->kind != BASIC||type1->type->kind != BASIC)
+			{
+				printf( "Error type 7 at line %d: Type mismatched for operands.\n", first->lineno );
+				return NULL;
+			}
+			if(t->type->u.basic != 0 || type1->type->u.basic != 0)
+			{
+				printf( "Error type 7 at line %d: Type mismatched for operands.\n", first->lineno );
+				return NULL;
+			}
+			res->type = t->type;
+			res->CanBeAss = false;
+			return res;
+		}
+		//Exp : Exp LB Exp RB
+		else if(strcmp(second->unit,"LB") == 0)
+		{
+			printf("Exp : Exp LB Exp RB\n");
+			if(t->type->kind != ARRAY)
+			{
+				printf( "Error type 10 at line %d: \"%s\" is not an array.\n", first->lineno, t->name );
+				return NULL;
+			}
+			if(type1->type->kind != BASIC || type1->type->u.basic != 0)
+			{
+				printf( "Error type 12 at line %d: \"%s\" is not an integer.\n", first->lineno , third->child->name );
+				return NULL;
+			}
+			Type p = t->type->u.array.element;
+			res->type = p;
+			if(p->u.array.element == NULL)
+			{
+				res = p->u.array.arrlist;
+			}
+			res->CanBeAss = true;
+			return res;
+		}
+		else if(strcmp(second->unit,"DOT") == 0)
+		{
+			//Exp->Exp DOT ID
+		printf("Exp->Exp DOT ID\n");
 		SymNode t = Exp(first);
 		if(t == NULL)
 			return NULL;
@@ -479,83 +598,6 @@ SymNode Exp(TreeNode exp)
 		}
 		printf( "Error type 14 at line %d: Non-existent field \"%s\".\n", first->lineno, second->next->name );
 		return NULL;
-	}
-	else if(strcmp(first->unit,"Exp")==0)
-	{
-		TreeNode third = second->next;
-
-		SymNode t = Exp(first);
-		SymNode type1 = Exp(third);
-		if(t == NULL || type1 == NULL)//
-			return NULL;
-		//Exp->Exp ASSIGNOP Exp
-		if(strcmp(second->unit, "ASSIGNOP") == 0)
-		{
-			//t在赋值号左边，type1在赋值号后边
-			if(!t->CanBeAss )//赋值号左边出现一个只有右值的表达式
-				printf( "Error type 6 at line %d: The left-hand side of an assignment must be a variable.\n", first->lineno );
-			if(!match_type(t->type,type1->type))//赋值号两边的表达式类型不匹配
-				printf( "Error type 5 at line %d: Type mismatched for assignment.\n", first->lineno );
-		}
-		//Exp->Exp PLUS Exp| Exp -> Exp MINUS Exp| Exp -> Exp STAR Exp|Exp -> Exp DIV Exp|Exp -> Exp RELOP Exp
-
-		else if(strcmp(second->unit,"PLUS") == 0||strcmp(second->unit, "MINUS") == 0||strcmp(second->unit,"STAR")==0||strcmp(second->unit,"DIV")==0||strcmp(second->unit,"RELOP")==0)
-		{
-			if(t->type->kind != BASIC||type1->type->kind != BASIC)//操作数类型与操作符不匹配
-			{
-				printf( "Error type 7 at line %d: Type mismatched for operands.\n", first->lineno );
-				return NULL;
-			}
-			if(t->type->u.basic != type1->type->u.basic)//操作数类型不匹配
-			{
-				printf( "Error type 7 at line %d: Type mismatched for operands.\n", first->lineno );
-				return NULL;
-			}
-			res->type = t->type;
-			if(strcmp(second->unit,"RELOP") == 0)
-				res->type->u.basic = 0;
-			res->CanBeAss = false;
-			return res;
-		}
-		//Exp : Exp AND Exp
-		//Exp : Exp OR Exp
-		else if(strcmp(second->unit,"AND")==0||strcmp(second->unit,"OR") == 0)
-		{
-			if(t->type->kind != BASIC||type1->type->kind != BASIC)
-			{
-				printf( "Error type 7 at line %d: Type mismatched for operands.\n", first->lineno );
-				return NULL;
-			}
-			if(t->type->u.basic != 0 || type1->type->u.basic != 0)
-			{
-				printf( "Error type 7 at line %d: Type mismatched for operands.\n", first->lineno );
-				return NULL;
-			}
-			res->type = t->type;
-			res->CanBeAss = false;
-			return res;
-		}
-		//Exp : Exp LB Exp RB
-		else if(strcmp(second->unit,"LB") == 0)
-		{
-			if(t->type->kind != ARRAY)
-			{
-				printf( "Error type 10 at line %d: \"%s\" is not an array.\n", first->lineno, t->name );
-				return NULL;
-			}
-			if(type1->type->kind != BASIC || type1->type->u.basic != 0)
-			{
-				printf( "Error type 12 at line %d: \"%s\" is not an integer.\n", first->lineno , third->child->name );
-				return NULL;
-			}
-			Type p = t->type->u.array.element;
-			res->type = p;
-			if(p->u.array.element == NULL)
-			{
-				res = p->u.array.arrlist;
-			}
-			res->CanBeAss = true;
-			return res;
 		}
 	}
 	else if(strcmp(first->name, "LP") == 0)
@@ -566,6 +608,7 @@ SymNode Exp(TreeNode exp)
 	//Exp : NOT Exp
 	else if(strcmp(first->name, "MINUS") == 0 || strcmp(first->name, "NOT") == 0)
 	{ 
+		printf("Exp : MINUS Exp||Exp : NOT Exp\n");
 		SymNode type1 = Exp(first);
 		if(type1 == NULL)
 			return NULL;
@@ -587,6 +630,7 @@ SymNode Exp(TreeNode exp)
 	else if(strcmp(first->name, "ID") == 0)
 	{
 		//Exp : ID
+		printf("Exp : ID\n");
 		if(second == NULL)
 		{
 			res = check_sym_table(first->name);
@@ -602,6 +646,7 @@ SymNode Exp(TreeNode exp)
 		TreeNode third = second->next;
 		//Exp : ID LP Args RP
 		//Exp : ID LP RP
+		printf("Exp : ID LP Args RP||Exp : ID LP RP\n");
 		FuncNode func = check_func_table(first->name);
 		SymNode sym = check_sym_table(first->name);
 		if(sym != NULL&&func == NULL)
@@ -642,6 +687,7 @@ SymNode Exp(TreeNode exp)
 	else if(strcmp(first->name, "INT") == 0)
 	{	
 		//Exp : INT
+		printf("Exp : INT\n");
 		Type type = malloc(sizeof(struct Type_));
 		type->kind = BASIC;
 		type->u.basic = 0;
@@ -652,6 +698,7 @@ SymNode Exp(TreeNode exp)
 	else if(strcmp(first->name, "FLOAT") == 0)
 	{
 		//Exp : FLOAT
+		printf("Exp : FLOAT\n");
 		Type type = malloc(sizeof(struct Type_));
 		type->kind = BASIC;
 		type->u.basic = 1;
@@ -667,10 +714,12 @@ SymNode Args(TreeNode arg)
 	SymNode res=Exp(arg->child);
 	TreeNode second=arg->child->next;
 	//Args->Exp COMMA Args
+	printf("Args->Exp COMMA Args\n");
 	if(second!= NULL)
 	{
 		res->param_next = Args(second->next);
 	}
 	//Args->Exp
+	printf("Args->Exp\n");
 	return res;
 }
