@@ -236,7 +236,7 @@ SymNode StructSpecifier(TreeNode sspec) {
 	SymNode res;
 	if(strcmp(second->unit, "OptTag") == 0) {
 		// StructSpecifier -> STRUCT OptTag LC DefList RC
-		print("StructSpecifier -> STRUCT OptTag LC DefList RC\n");
+		printf("StructSpecifier -> STRUCT OptTag LC DefList RC\n");
 		res = malloc(sizeof(struct SymNode_));
 		Type type = malloc(sizeof(struct Type_));
 		type->kind = STRUCT;
@@ -428,9 +428,10 @@ void Stmt(TreeNode stmt, SymNode sn) {
 
 SymNode DefList(TreeNode defl, int flag) {
 	if(defl->child == NULL)
-		// DefList -> empty
+	{	// DefList -> empty
 		printf("DefList -> empty\n");
 		return NULL;
+	}
 	else {
 		// DefList -> Def DefList
 		printf("DefList -> Def DefList\n");
