@@ -175,12 +175,14 @@ void ExtDefList(TreeNode extl) {
 void ExtDef(TreeNode ext) {
 	//Specifier
 	SymNode sn = Specifier(ext->child);
-	if(sn) {
+	if(sn) 
+	{
 		TreeNode second = ext->child->next;
 		if(strcmp(second->unit, "ExtDecList") == 0) 
-			// ExtDef -> Specifier ExtDecList SEMI
+		{	// ExtDef -> Specifier ExtDecList SEMI
 			printf("ExtDef -> Specifier ExtDecList SEMI\n");
 			ExtDecList(second, sn);
+		}
 		else {
 			// ExtDef -> Specifier FunDec CompSt
 			printf("ExtDef -> Specifier FunDec CompSt\n");
@@ -197,7 +199,7 @@ void ExtDef(TreeNode ext) {
 
 void ExtDecList(TreeNode extl, SymNode sn) {
 	// ExtDecList -> VarDec
-	print("ExtDecList -> VarDec\n");
+	printf("ExtDecList -> VarDec\n");
 	VarDec(extl->child, sn, IN_BASIC);
 	if(extl->child->next)
 		// ExtDecList -> VarDec COMMA ExtDecList
@@ -209,9 +211,10 @@ SymNode Specifier(TreeNode spec) {
 	SymNode res;
 	TreeNode first = spec->child;
 	if(strcmp(first->unit, "StructSpecifier") == 0)
-		// Specifier -> StructSpecifier
+	{	// Specifier -> StructSpecifier
 		printf("Specifier -> StructSpecifier\n");
 		res = StructSpecifier(first);
+	}
 	else {
 		// Specifier -> TYPE
 		printf("Specifier -> TYPE\n");
