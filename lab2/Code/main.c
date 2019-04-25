@@ -1,16 +1,18 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "syntaxtree.h"
+#include "sym_table.h"
 
 //#ifdef YY_DEBUG
 //extern int yydebug;
 //#endif
 
 //extern int yylineno;
-extern struct TreeNode* root;
+extern TreeNode root;
 extern void yyparse();
 extern void yyrestart(FILE* f);
 extern void printTree();
+extern void Program(TreeNode r);
 extern bool signal;
 //extern struct TreeNode* current;
 
@@ -29,8 +31,10 @@ int main(int argc, char** argv) {
 //		yydebug = 1;
 //#endif
 		yyparse();
-		if(signal)
+		if(signal) {
 				printTree();
+				Program(root);
+		}
 		return 0;
 }
 
