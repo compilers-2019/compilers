@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
 //#endif
 		yyparse();
 		if(signal) {
-				printTree();
+				//printTree();
 				Program(root);
 		}
 		return 0;
