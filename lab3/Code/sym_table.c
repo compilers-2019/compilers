@@ -794,3 +794,28 @@ SymNode Args(TreeNode arg)
 	//printf("Args->Exp\n");
 	return res;
 }
+
+void printSymTable() {
+	int num = 0;
+	for(int i = 0; i < HASH_LENGTH; i++) {
+		if(sym_table[i] != NULL) {
+			num++;
+			printf("SymNode No.%d: %s.\n", num, sym_table[i]->name);
+		}
+	}
+}
+
+void printFuncTable() {
+	int num = 0;
+	for(int i = 0; i < HASH_LENGTH; i++) {
+		if(func_table[i] != NULL) {
+			num++;
+			printf("FuncNode No.%d: %s.\n", num, func_table[i]->name);
+		}
+	}
+}
+
+void printTable() {
+	printSymTable();
+	printFuncTable();
+}

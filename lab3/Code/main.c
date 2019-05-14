@@ -34,6 +34,7 @@ int main(int argc, char** argv) {
 		if(signal) {
 				printTree();
 				start(root);
+				//printTable();
 		}
 		return 0;
 }

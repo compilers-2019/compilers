@@ -92,4 +92,8 @@ SymNode Dec(TreeNode dec, SymNode sn, int flag);
 SymNode Exp(TreeNode exp);
 SymNode Args(TreeNode args);
 
+void printSymTable();
+void printFuncTable();
+void printTable();
+
 #endif
