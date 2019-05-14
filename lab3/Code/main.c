@@ -32,8 +32,8 @@ int main(int argc, char** argv) {
 //#endif
 		yyparse();
 		if(signal) {
-				//printTree();
-				Program(root);
+				printTree();
+				start(root);
 		}
 		return 0;
 }

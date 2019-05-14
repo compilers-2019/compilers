@@ -14,15 +14,57 @@ unsigned int hash_pjw(char* name)
 
 void start(TreeNode r) {
 	init();
+	//printf("OK\n");
 	Program(r);
 }
 
 void init() {
+    // Add read and write
 	for(int i = 0; i < HASH_LENGTH; i++) {
 		sym_table[i] = NULL;
 		func_table[i] = NULL;
 	}
+
+	FuncNode read = malloc(sizeof(struct FuncNode_));
+	Type t = malloc(sizeof(struct Type_));
+	t->kind = BASIC;
+	t->u.basic = 0;
+	SymNode sn = malloc(sizeof(struct SymNode_));
+	sn->type = t;
+	read->returnType = sn;
+	read->name = malloc(sizeof(char) * 10);
+	strcpy(read->name, "read");
+	read->ifdefine = true;
+	read->hash_next = NULL;
+	read->params = NULL;
+	insert_func_table(read);
+
+	FuncNode write = malloc(sizeof(struct FuncNode_));
+	t = NULL;
+	t = malloc(sizeof(struct Type_));
+	t->kind = BASIC;
+	t->u.basic = 0;
+	sn = NULL;
+	sn = malloc(sizeof(struct SymNode_));
+	sn->type = t;
+	write->returnType = sn;
+	write->name = malloc(sizeof(char) * 10);
+	strcpy(write->name, "write");
+	write->ifdefine = true;
+	write->hash_next = NULL;
+	sn = NULL;
+	sn = malloc(sizeof(struct SymNode_));
+	Type snt = malloc(sizeof(struct Type_));
+	snt->kind = BASIC;
+	snt->u.basic = 0;
+	sn->type = snt;
+	sn->name = malloc(sizeof(char) * 10);
+	strcpy(sn->name, "number");
+	sn->param_next = NULL;
+	write->params = sn;
+	insert_func_table(write);
 }
+
 void print_type(SymNode a)
 {
 	for(SymNode p = a; p != NULL;p = p->param_next)
@@ -51,6 +93,7 @@ void print_type(SymNode a)
 
 int use_func(SymNode a, SymNode b)//调用函数
 {
+	//("Enter\n");
 	if(a == NULL && b == NULL)
 		return 1;
 	int count_a = 0;
@@ -59,6 +102,7 @@ int use_func(SymNode a, SymNode b)//调用函数
 		count_a++;
 	for(SymNode p = b; p != NULL;p = p->param_next)
 		count_b++;
+	//printf("OK\n");
 	if(count_a != count_b)
 		return 0;
 	SymNode p = a; SymNode q = b;
@@ -86,6 +130,7 @@ bool match_type(Type a,Type b)//检查类型（类型匹配）
 {
 	if(a->kind!=b->kind)
 	{
+		//printf("Enter match_type\n");
 		return false;
 	}
 	else if(a->kind == BASIC)//basic
@@ -555,8 +600,10 @@ SymNode Exp(TreeNode exp)
 			//t在赋值号左边，type1在赋值号后边
 			if(!t->CanBeAss )//赋值号左边出现一个只有右值的表达式
 				printf( "Error type 6 at line %d: The left-hand side of an assignment must be a variable.\n", first->lineno );
+			//printf("OK\n");
 			if(!match_type(t->type,type1->type))//赋值号两边的表达式类型不匹配
 				printf( "Error type 5 at line %d: Type mismatched for assignment.\n", first->lineno );
+			//printf("OK\n");
 		}
 		//Exp->Exp PLUS Exp| Exp -> Exp MINUS Exp| Exp -> Exp STAR Exp|Exp -> Exp DIV Exp|Exp -> Exp RELOP Exp
 
@@ -631,7 +678,7 @@ SymNode Exp(TreeNode exp)
 	else if(strcmp(first->unit, "MINUS") == 0 || strcmp(first->unit, "NOT") == 0)
 	{ 
 		//printf("Exp : MINUS Exp||Exp : NOT Exp\n");
-		SymNode type1 = Exp(first);
+		SymNode type1 = Exp(first->next);
 		if(type1 == NULL)
 			return NULL;
 		if(type1->type->kind != BASIC)
@@ -668,9 +715,9 @@ SymNode Exp(TreeNode exp)
 		TreeNode third = second->next;
 		//Exp : ID LP Args RP
 		//Exp : ID LP RP
-		//printf("Exp : ID LP Args RP||Exp : ID LP RP\n");
 		FuncNode func = check_func_table(first->name);
 		SymNode sym = check_sym_table(first->name);
+		//printf("Exp : ID LP Args RP||Exp : ID LP RP\n");
 		if(sym != NULL&&func == NULL)
 		{
 			printf( "Error type 11 at line %d: \"%s\" is not a function.\n", first->lineno, first->name );
@@ -684,6 +731,7 @@ SymNode Exp(TreeNode exp)
 		if(strcmp(third->unit, "Args")==0)
 		{
 			SymNode params = Args(third);
+			//printf("???\n");
 			if(use_func(params,func->params) == 0)//调用函数
 			{
 				printf( "Error type 9 at line %d: Function \"%s(", first->lineno, func->name );
@@ -704,6 +752,7 @@ SymNode Exp(TreeNode exp)
 		}
 		res = func->returnType;
 		res->CanBeAss = false;
+		//printf("return\n");
 		return res;
 	}
 	else if(strcmp(first->unit, "INT") == 0)

@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "syntaxtree.h"
 #include "sym_table.h"
 
@@ -11,7 +12,7 @@ enum R_KIND{
 };
 
 enum O_KIND{
-		VARIABLE, CONSTANT, ADDRESS, LABEL, FUNCTION, 
+		VARIABLE, CONSTANT, ADDRESS,
 };
 
 enum I_KIND{
@@ -22,8 +23,12 @@ enum I_KIND{
 		PARAM, READ, WRITE, 
 };
 
+int temp_num = 0;
+#define MAX_TEMP 0x3fff
+
 typedef struct Operand_* Operand;
 typedef struct InterCode_* InterCode;
+typedef struct Temp_* Temp;
 
 struct Operand_ {
 		enum O_KIND kind;
@@ -48,8 +53,14 @@ struct InterCode_ {
 		InterCode next;
 };
 
+struct Temp_ {
+		int num;
+		char name[5];
+};
+
 InterCode codeRoot;
+Temp temp_table[MAX_TEMP];
 
-
+Temp new_temp();
 
 #endif

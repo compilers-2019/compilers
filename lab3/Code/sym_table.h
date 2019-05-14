@@ -40,7 +40,7 @@ struct SymNode_ {
 };
 
 struct FuncNode_ {
-	Type returnType;
+	SymNode returnType;
 	SymNode params;
 	char* name;
 	bool ifdefine;
