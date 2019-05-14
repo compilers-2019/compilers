@@ -165,6 +165,7 @@ void insert_sym_table(SymNode n) {
 			s = s->hash_next;
 		s->hash_next = n;
 	}
+	n->no = num;
 }
 
 void insert_func_table(FuncNode n) {
@@ -178,6 +179,7 @@ void insert_func_table(FuncNode n) {
 			f = f->hash_next;
 		f->hash_next = n;
 	}
+	n->no = num;
 }
 
 SymNode check_sym_table(char* name) {

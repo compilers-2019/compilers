@@ -7,7 +7,7 @@ Operand new_temp() {
 	t->u.temp.temp_no = temp_num;
 	strcpy(t->u.temp.name, "t");
 	char str[4];
-	//itoa(t->num, str, 10);
+	// itoa(t->num, str, 10);
 	sprintf(str, "%d", t->num);
 	strcat(t->u.temp.name, str);
 	return t;
@@ -38,5 +38,16 @@ InterCode translate_Exp(TreeNode tr, Operand place) {
 		res->u.assign.result = place;
 		res->u.assign.op = op;
 		return res;
+	}
+	else if(strcmp(first->unit, "ID") == 0) {
+		// Exp -> ID
+		SymNode variable = check_sym_table(first->name);
+		if(variable == NULL) {
+			printf("Why NULL? Exp -> ID\n");
+			return NULL;
+		}
+		else {
+			
+		}
 	}
 }

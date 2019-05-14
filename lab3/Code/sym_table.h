@@ -37,6 +37,7 @@ struct SymNode_ {
 	SymNode hash_next;
 	SymNode param_next;
 	SymNode struct_next;
+	int no;
 };
 
 struct FuncNode_ {
@@ -46,6 +47,7 @@ struct FuncNode_ {
 	bool ifdefine;
 	int lineno;
 	FuncNode hash_next;
+	int no;
 };
 
 SymNode sym_table[HASH_LENGTH];
