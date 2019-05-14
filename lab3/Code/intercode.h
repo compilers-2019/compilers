@@ -12,7 +12,7 @@ enum R_KIND{
 };
 
 enum O_KIND{
-		VARIABLE, CONSTANT, ADDRESS,
+		VARIABLE, CONSTANT, ADDRESS, TEMP,
 };
 
 enum I_KIND{
@@ -35,7 +35,11 @@ struct Operand_ {
 	union {
 		int var_no;
 		int value;
-		char *name;
+		//char *name;
+		struct {
+			int temp_no;
+			char name[5];
+		} temp;
 	} u;
 };
 
