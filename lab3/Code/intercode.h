@@ -6,15 +6,15 @@
 #include "syntaxtree.h"
 #include "sym_table.h"
 
-enum R_KIND {
+enum R_KIND{
 		G, GE, L, LE, E,
 };
 
-enum O_KIND {
+enum O_KIND{
 		VARIABLE, CONSTANT, ADDRESS, LABEL, FUNCTION, 
 };
 
-enum I_KIND {
+enum I_KIND{
 		LABEL, FUNC, ASSIGN, ADD, 
 		SUB, MUL, DIV, CITE, 
 		GETPOINTER, ASSIGNPOINTER, GOTO, IFGOTO, 
@@ -26,7 +26,7 @@ typedef struct Operand_* Operand;
 typedef struct InterCode_* InterCode;
 
 struct Operand_ {
-		O_KIND kind;
+		enum O_KIND kind;
 		union {
 				int var_no;
 				int value;
@@ -35,12 +35,12 @@ struct Operand_ {
 };
 
 struct InterCode_ {
-		I_KIND kind;
+		enum I_KIND kind;
 		union {
-				struct { Operand op; } sinop; 									/* LABEL, FUNCTION, GOTO, RETURN, ARG, PARAM, READ, WRITE */
-				struct { Operand right, left; } assign;							/* ASSIGN */
-				struct { Operand result, op1, op2; } binop;						/* ADD, SUB, MUL, DIV, CITE, GETPOINTER, ASSIGNPOINTER */
-				struct { Operand re1, re2, label; R_KIND kind; } ifgoto;		/* IFGOTO */
+				struct { Operand op; } single; 									/* LABEL, FUNCTION, GOTO, RETURN, ARG, PARAM, READ, WRITE */
+				struct { Operand result, op; } assign;							/* ASSIGN, GETPOINTER, ASSIGNPOINTER */
+				struct { Operand result, op1, op2; } binop;						/* ADD, SUB, MUL, DIV, CITE */
+				struct { Operand re1, re2, label; enum R_KIND kind; } ifgoto;	/* IFGOTO */
 				struct { Operand dec; int size; } dec;							/* DEC */
 				struct { Operand ret, func; } call;								/* CALL */
 		} u;
