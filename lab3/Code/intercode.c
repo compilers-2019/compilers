@@ -296,6 +296,13 @@ InterCode translate_Exp(TreeNode tr, Operand place) {
 			return res;
 		}
 	}
+	else if(strcmp(first->unit, "LP") == 0) {
+		// Exp -> LP Exp RP
+		Operand t1 = new_temp();
+		res = translate_Exp(second, t1);
+		InterCode code2 = new_code(ASSIGN, place, t1);
+		return merge_code(2, res, code2);
+	}
 	return NULL;
 }
 

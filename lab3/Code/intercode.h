@@ -10,7 +10,7 @@
 #include "sym_table.h"
 
 enum R_KIND{
-		G, GE, L, LE, E,
+		G, GE, L, LE, E, NE, 
 };
 
 enum O_KIND{
