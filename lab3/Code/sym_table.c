@@ -239,11 +239,11 @@ void ExtDef(TreeNode ext) {
 			// ExtDef -> Specifier FunDec CompSt
 			//printf("ExtDef -> Specifier FunDec CompSt\n");
 			FuncNode fn = FunDec(second, sn);
-			CompSt(second->next, sn);
 			if(!check_func_table(fn->name))
 				insert_func_table(fn);
 			else
 				printf("Error type 4 at line %d: Redefined function \"%s\".\n", fn->lineno, fn->name);
+			CompSt(second->next, sn);
 		}
 	}
 	//printf("ExtDef -> Specifier SEMI\n");
