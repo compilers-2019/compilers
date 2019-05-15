@@ -15,7 +15,7 @@ Operand new_temp() {
 
 Operand new_label() {
 	label_num++;
-	Operand l = new_op(OLABLE);
+	Operand l = new_op(O_LABEL);
 	label_table[label_num] = l;
 	l->u.label.label_no = label_num;
 	strcpy(l->u.label.name, "label");
