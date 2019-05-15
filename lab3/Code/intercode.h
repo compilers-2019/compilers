@@ -13,18 +13,20 @@ enum R_KIND{
 };
 
 enum O_KIND{
-		VARIABLE, CONSTANT, ADDRESS, TEMP,
+		VARIABLE, CONSTANT, ADDRESS, POINTER, 
+		TEMP, O_LABEL, FUNCTION, 
 };
 
 enum I_KIND{
 		LABEL, FUNC, ASSIGN, ADD, 
-		SUB, MUL, DIV, CITE, 
-		GETPOINTER, ASSIGNPOINTER, GOTO, IFGOTO, 
+		SUB, MUL, DIV, /* CITE, 
+		GETPOINTER, ASSIGNPOINTER, */ GOTO, IFGOTO, 
 		RETURN, DEC, ARG, CALL, 
 		PARAM, READ, WRITE, 
 };
 
 int temp_num = 0;
+int label_num = 0;
 #define MAX_TEMP 0x3fff
 
 typedef struct Operand_* Operand;
@@ -40,7 +42,13 @@ struct Operand_ {
 		struct {
 			int temp_no;
 			char name[5];
+			Operand prev;
+			Operand next;
 		} temp;
+		struct {
+			int label_no;
+			char name[5];
+		} label;
 	} u;
 };
 
@@ -65,8 +73,10 @@ struct InterCode_ {
 
 InterCode codeRoot;
 Operand temp_table[MAX_TEMP];
+Operand label_table[MAX_TEMP];
 
 Operand new_temp();
+Operand new_label();
 
 Operand new_op(enum O_KIND kind);
 InterCode new_code(enum I_KIND kind);

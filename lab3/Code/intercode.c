@@ -8,9 +8,22 @@ Operand new_temp() {
 	strcpy(t->u.temp.name, "t");
 	char str[4];
 	// itoa(t->num, str, 10);
-	sprintf(str, "%d", t->num);
+	sprintf(str, "%d", t->u.temp.temp_no);
 	strcat(t->u.temp.name, str);
 	return t;
+}
+
+Operand new_label() {
+	label_num++;
+	Operand l = new_op(OLABLE);
+	label_table[label_num] = l;
+	l->u.label.label_no = label_num;
+	strcpy(l->u.label.name, "label");
+	char str[4];
+	// itoa(t->num, str, 10);
+	sprintf(str, "%d", l->u.label.label_no);
+	strcat(l->u.label.name, str);
+	return l;
 }
 
 Operand new_op(enum O_KIND kind) {
