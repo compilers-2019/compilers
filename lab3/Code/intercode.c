@@ -12,7 +12,6 @@ Operand new_temp() {
 	strcat(t->u.temp.name, str);
 	t->u.temp.prev = NULL;
 	t->u.temp.next = NULL;
-	t->u.temp.ifparam = -1;
 	return t;
 }
 
@@ -169,13 +168,12 @@ InterCode translate_Exp(TreeNode tr, Operand place) {
 				if(strcmp(third->unit, "Args") == 0) {
 					// Exp -> ID LP Args RP
 					Operand arg_list = new_temp();
-					arg_list->u.temp.ifparam = 0;
 					InterCode code1 = translate_Args(third, arg_list);
 					if(strcmp(func->name, "write") == 0) {
-						res = merge_code(2, code1, new_code(WRITE, arg_list));
+						res = merge_code(2, code1, new_code(WRITE, arg_list->u.temp.next));
 					}
 					else {
-						Operand cur = arg_list;
+						Operand cur = arg_list->u.temp.next;
 						code1 = merge_code(2, code1, new_code(ARG, cur));
 						while(cur->u.temp.next != NULL) {
 							cur = cur->u.temp.next;
@@ -306,11 +304,21 @@ InterCode translate_Cond(TreeNode tr, Operand label_true, Operand label_false) {
 }
 
 InterCode translate_Args(TreeNode tr, Operand arg_list) {
-	// TreeNode first = tr->child;
-	// TreeNode second = first->next;
-	// if(second == NULL) {
-	// 	// Args -> Exp
-	// 	Operand t1 = new_temp();
-	// 	InterCode code1 = 
-	// }
+	TreeNode first = tr->child;
+	TreeNode second = first->next;
+	Operand t1 = new_temp();
+	InterCode code1 = translate_Exp(first, t1);
+	Operand cur = arg_list;
+	while(cur->u.temp.next != NULL) {
+		cur = cur->u.temp.next;
+	}
+	cur->u.temp.next = t1;
+	t1->u.temp.prev = cur;
+	// Args -> Exp
+	if(second != NULL) {
+		// Args -> Exp COMMA Args
+		InterCode code2 = translate_Args(second->next, arg_list);
+		code1 = merge_code(2, code1, code2);
+	}
+	return code1;
 }

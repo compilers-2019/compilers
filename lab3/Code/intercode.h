@@ -44,7 +44,6 @@ struct Operand_ {
 			char name[5];
 			Operand prev;
 			Operand next;
-			int ifparam;
 		} temp;
 		struct {
 			int label_no;
