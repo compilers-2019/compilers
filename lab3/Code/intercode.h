@@ -83,6 +83,7 @@ InterCode new_code(enum I_KIND kind, ...);
 InterCode merge_code(int n, InterCode code1, InterCode code2, ...);
 
 InterCode translate_Exp(TreeNode tr, Operand place);
+InterCode translate_Compst(TreeNode tr);
 InterCode translate_Cond(TreeNode tr, Operand label_true, Operand label_false);
 InterCode translate_Args(TreeNode tr, Operand arg_list);
 

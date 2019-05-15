@@ -305,10 +305,191 @@ InterCode translate_Exp(TreeNode tr, Operand place) {
 	}
 	return NULL;
 }
+InterCode translate_Stmt(TreeNode tr)
+{
+	TreeNode first=tr->child;
+	TreeNode second=first->next;
+	//InterCode res;
+	if(strcmp(first->unit,"EXP")==0)
+	{
+		//Stmt -> Exp SEMI
+		return translate_Exp(first,NULL);
+	}
+	else if(strcmp(first->unit,"CompSt")==0)
+	{
+		//Stmt -> CompSt
+		return translate_Compst(first);
+	}
+	else if(strcmp(first->unit,"RETURN")==0)
+	{
+		//Stmt -> RETURN Exp SEMI
+		Operand t1=new_temp();
+		//code1
+		InterCode code1=translate_Exp(second,t1);
+		//code2
+		InterCode code2=new_code(RETURN,t1);
+		//code2->u.single.op = t1;
+		//res = new_code(ASSIGN, place, op0);
+		return merge_code(2,code1,code2);
+	}
+	else if(strcmp(first->unit,"WHILE")==0)
+	{
+		//Stmt->WHILE LP Exp RP Stmt1
+		Operand label1=new_label();
+		Operand label2=new_label();
+		Operand label3=new_label();
+		//code1
+		InterCode code1=translate_Cond(second->next,label2,label3);
+		//code2
+		InterCode code2=translate_Stmt(second->next->next->next);
+		//[LABEL label1]
+		InterCode temp1=new_code(LABEL,label1);
+		//temp1->u.single.op = label1;
+		//[LABEL label2]
+		InterCode temp2=new_code(LABEL,label1);
+		//temp2->u.single.op = label2;
+		//[GOTO label1]
+		InterCode temp3=new_code(GOTO,label1);
+		//temp1->u.single.op = label1;
+		//[LABEL label3]
+		InterCode temp4=new_code(LABEL,label3);
+		//temp4->u.single.op = label3;
+		return merge_code(6,temp1,code1,temp2,code2,temp3,temp4);
+	}
+	else if(strcmp(first->unit,"IF")==0)
+	{
+		TreeNode third=second->next->next->next;//实际为第5位
+		if(strcmp(third->unit,"Stmt")&&third->next==NULL)
+		{
+			//Stmt->IF LP Exp RP Stmt
+			Operand label1=new_label();
+			Operand label2=new_label();
+		
+			//code1
+			InterCode code1=translate_Cond(second->next,label1,label2);
+			//code2
+			InterCode code2=translate_Stmt(second->next->next->next);
+			//[LABEL label1]
+			InterCode temp1=new_code(LABEL,label1);
+			//temp1->u.single.op = label1;
+			//[LABEL label2]
+			InterCode temp2=new_code(LABEL,label2);
+			//temp2->u.single.op = label2;
+			return merge_code(4,code1,temp1,code2,temp2);
+		}
+		else
+		{
+			//Stmt->IF LP Exp RP Stmt ELSE Stmt
+			Operand label1=new_label();
+			Operand label2=new_label();
+			Operand label3=new_label();
+			//code1
+			InterCode code1=translate_Cond(second->next,label1,label2);
+			//code2
+			InterCode code2=translate_Stmt(third);
+			//code3
+			InterCode code3=translate_Stmt(third->next->next);
+			//[LABEL label1]
+			InterCode temp1=new_code(LABEL,label1);
+			//temp1->u.single.op = label1;
+			//[LABEL label2]
+			InterCode temp2=new_code(LABEL,label2);
+			//temp2->u.single.op = label2;
+			//[GOTO label3]
+			InterCode temp3=new_code(GOTO,label3);
+			//temp1->u.single.op = label3;
+			//[LABEL label3]
+			InterCode temp4=new_code(LABEL,label3);
+			//temp4->u.single.op = label3;
+			return merge_code(7,code1,temp1,code2,temp3,temp2,code3,temp4);
+		}
 
-InterCode translate_Cond(TreeNode tr, Operand label_true, Operand label_false) {
-
+	}
 }
+
+InterCode translate_Cond(TreeNode tr,Operand label_true,Operand label_false)
+{
+	TreeNode first=tr->child;
+	TreeNode second=first->next;
+	if(strcmp(first->unit,"Exp")==0)
+	{
+		if(strcmp(second->unit,"RELOP")==0)
+		{
+			Operand t1=new_temp();
+			Operand t2=new_temp();
+			//code1
+			InterCode code1=translate_Exp(first,t1);
+			//code2
+			InterCode code2=translate_Exp(second->next,t2);
+			//op = get_relop(RELOP)
+			enum R_KIND op;
+			if(strcmp(second->name,">=")==0)
+			{
+				op=GE;
+			}
+			else if(strcmp(second->name,">")==0)
+			{
+				op=G;
+			}
+			else if(strcmp(second->name,"<=")==0)
+			{
+				op=LE;
+			}
+			else if(strcmp(second->name,"<")==0)
+			{
+				op=L;
+			}
+			else if(strcmp(second->name,"==")==0)
+			{
+				op=E;
+			}
+			else
+			{
+				op=NE;
+			}		
+			//code3
+			InterCode code3=new_code(IFGOTO,t1,t2,label_true,op);
+			//[GOTO label_false]
+			InterCode temp=new_code(GOTO,label_false);
+			return merge_code(4,code1,code2,code3,temp);
+		}
+		else if(strcmp(second->unit,"AND")==0)
+		{
+			Operand label1=new_label();
+			InterCode code1=translate_Cond(first,label1,label_false);
+			InterCode code2=translate_Cond(second->next,label_true,label_false);
+			//[LABEL label1]
+			InterCode temp1=new_code(LABEL,label1);
+			return merge_code(3,code1,temp1,code2);
+		}
+		else if(strcmp(second->unit,"OR")==0)
+		{
+			Operand label1=new_label();
+			InterCode code1=translate_Cond(first,label_true,label1);
+			InterCode code2=translate_Cond(second->next,label_true,label_false);
+			//[LABEL label1]
+			InterCode temp1=new_code(LABEL,label1);
+			return merge_code(3,code1,temp1,code2);
+		}	
+	}
+	else if(strcmp(first->unit,"NOT")==0)
+	{
+		return translate_Cond(second,label_false,label_true);
+	}
+	else
+	{
+		Operand t1=new_temp();
+		InterCode code1=translate_Exp(tr,t1);
+		Operand op = new_op(CONSTANT, 0);
+		InterCode code2=new_code(IFGOTO,t1,op,label_true, NE);
+		//[GOTO label_false]
+		InterCode temp=new_code(GOTO,label_false);
+		return merge(code1,code2,temp);
+	}
+	
+	
+}
+
 
 InterCode translate_Args(TreeNode tr, Operand arg_list) {
 	TreeNode first = tr->child;
