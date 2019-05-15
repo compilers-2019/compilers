@@ -22,19 +22,34 @@ Operand new_op(enum O_KIND kind) {
 InterCode new_code(enum I_KIND kind) {
 	InterCode code = malloc(sizeof(struct InterCode_));
 	code->kind = kind;
+	code->prev = NULL;
+	code->next = NULL;
 	return code;
+}
+
+InterCode merge_code(InterCode code1, InterCode code2) {
+	InterCode cur = code1;
+	while(cur->next != NULL) {
+		cur = cur->next;
+	}
+	cur->next = code2;
+	code2->prev = cur;
+	return code1;
 }
 
 InterCode translate_Exp(TreeNode tr, Operand place) {
 	TreeNode first = tr->child;
 	TreeNode second = first->next;
+	InterCode res = malloc(sizeof(struct InterCode_));
+	res->prev = NULL;
+	res->next = NULL;
 
 	if(strcmp(first->unit, "INT") == 0) {
 		// Exp -> INT
 		int value = (int)first->val;
 		Operand op = new_op(CONSTANT);
 		op->u.value = value;
-		InterCode res = new_code(ASSIGN);
+		res->kind = ASSIGN;
 		res->u.assign.result = place;
 		res->u.assign.op = op;
 		return res;
@@ -47,7 +62,24 @@ InterCode translate_Exp(TreeNode tr, Operand place) {
 			return NULL;
 		}
 		else {
-			
+			Operand op = new_op(VARIABLE);
+			op->u.var_no = variable->no;
+			res->kind = ASSIGN;
+			res->u.assign.result = place;
+			res->u.assign.op = op;
+			return res;
 		}
+	}
+	else if(strcmp(first->unit, "MINUS") == 0) {
+		// Exp -> MINUS Exp
+		Operand t1 = new_temp(); 
+		InterCode code1 = translate_Exp(second, t1);
+		res = new_code(SUB);
+		res->u.binop.result = place;
+		Operand zero = new_op(CONSTANT);
+		zero->u.value = 0;
+		res->u.binop.op1 = zero;
+		res->u.binop.op2 = t1;
+		return merge_code(code1, res);
 	}
 }
