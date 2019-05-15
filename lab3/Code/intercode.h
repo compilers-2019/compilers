@@ -78,7 +78,7 @@ Operand label_table[MAX_TEMP];
 Operand new_temp();
 Operand new_label();
 
-Operand new_op(enum O_KIND kind);
+Operand new_op(enum O_KIND kind, ...);
 InterCode new_code(enum I_KIND kind, ...);
 InterCode merge_code(int n, InterCode code1, InterCode code2, ...);
 

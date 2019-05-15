@@ -96,14 +96,32 @@ InterCode new_code(enum I_KIND kind, ...) {
 	return code;
 }
 
-InterCode merge_code(InterCode code1, InterCode code2) {
+InterCode merge_code(int n,InterCode code1,InterCode code2, ...)
+{
+	va_list parg;
+	va_start(parg,code2);
 	InterCode cur = code1;
 	while(cur->next != NULL) {
 		cur = cur->next;
 	}
 	cur->next = code2;
 	code2->prev = cur;
+	n=n-2;
+	while(n>0)
+	{
+		InterCode code = va_arg(parg, InterCode);
+		InterCode cur = code1;
+		while(cur->next != NULL) 
+		{
+			cur = cur->next;
+		}
+		cur->next = code;
+		code->prev = cur;
+		n--;
+	}
+	va_end(parg);
 	return code1;
+
 }
 
 InterCode translate_Exp(TreeNode tr, Operand place) {
