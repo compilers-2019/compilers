@@ -10,6 +10,9 @@ Operand new_temp() {
 	// itoa(t->num, str, 10);
 	sprintf(str, "%d", t->u.temp.temp_no);
 	strcat(t->u.temp.name, str);
+	t->u.temp.prev = NULL;
+	t->u.temp.next = NULL;
+	t->u.temp.ifparam = -1;
 	return t;
 }
 
@@ -26,7 +29,7 @@ Operand new_label() {
 	return l;
 }
 
-Operand new_op(enum O_KIND kind) {
+Operand new_op(enum O_KIND kind, ...) {
 	Operand op = malloc(sizeof(struct Operand_));
 	op->kind = kind;
 	va_list argptr;
@@ -38,7 +41,6 @@ Operand new_op(enum O_KIND kind) {
 		case VARIABLE:
 			op->u.var_no = va_arg(argptr, int);
 			break;
-		case FUNCTION: break;
 		default: break;
 	}
 	return op;
@@ -89,7 +91,7 @@ InterCode new_code(enum I_KIND kind, ...) {
 			break;
 		case CALL:
 			code->u.call.ret = va_arg(argptr, Operand);
-			code->u.call.func = va_arg(argptr, Operand); 
+			strcpy(code->u.call.name, va_arg(argptr, char*)); 
 			break;
 		default: break;
 	}
@@ -140,19 +142,60 @@ InterCode translate_Exp(TreeNode tr, Operand place) {
 		return res;
 	}
 	else if(strcmp(first->unit, "ID") == 0) {
-		// Exp -> ID
-		SymNode variable = check_sym_table(first->name);
-		if(variable == NULL) {
-			printf("Why NULL? Exp -> ID\n");
-			return NULL;
+		if(second == NULL) {
+			// Exp -> ID
+			SymNode variable = check_sym_table(first->name);
+			if(variable == NULL) {
+				printf("Why NULL? Exp -> ID\n");
+				return NULL;
+			}
+			else {
+				Operand op = new_op(VARIABLE, variable->no);
+				// res->kind = ASSIGN;
+				// res->u.assign.result = place;
+				// res->u.assign.op = op;
+				res = new_code(ASSIGN, place, op);
+				return res;
+			}
 		}
 		else {
-			Operand op = new_op(VARIABLE, variable->no);
-			// res->kind = ASSIGN;
-			// res->u.assign.result = place;
-			// res->u.assign.op = op;
-			res = new_code(ASSIGN, place, op);
-			return res;
+			FuncNode func = check_func_table(first->name);
+			if(func == NULL) {
+				printf("Why NULL? Exp -> ID LP (Args) RP\n");
+				return NULL;
+			}
+			else {
+				TreeNode third = second->next;
+				if(strcmp(third->unit, "Args") == 0) {
+					// Exp -> ID LP Args RP
+					Operand arg_list = new_temp();
+					arg_list->u.temp.ifparam = 0;
+					InterCode code1 = translate_Args(third, arg_list);
+					if(strcmp(func->name, "write") == 0) {
+						res = merge_code(2, code1, new_code(WRITE, arg_list));
+					}
+					else {
+						Operand cur = arg_list;
+						code1 = merge_code(2, code1, new_code(ARG, cur));
+						while(cur->u.temp.next != NULL) {
+							cur = cur->u.temp.next;
+							code1 = merge_code(2, code1, new_code(ARG, cur));
+						}
+						res = merge_code(2, code1, new_code(CALL, place, func->name));
+					}
+					return res;
+				}
+				else {
+					// Exp -> ID LP RP
+					if(strcmp(func->name, "read") == 0) {
+						res = new_code(READ, place);
+					}
+					else {
+						res = new_code(CALL, place, func->name);
+					}
+					return res;
+				}
+			}
 		}
 	}
 	else if(strcmp(first->unit, "MINUS") == 0) {
@@ -183,9 +226,91 @@ InterCode translate_Exp(TreeNode tr, Operand place) {
 		InterCode code1 = translate_Cond(tr, label1, label2);
 
 		// code2
-		InterCode code2 = new_code(LABEL);
-		code2->u.single.op = label1;
+		InterCode code2 = new_code(LABEL, label1);
+		code2 = merge_code(2, code2, new_code(ASSIGN, place, new_op(CONSTANT, 1)));
 
-		//
+		// code3
+		InterCode code3 = new_code(LABEL, label2);
+
+		return merge_code(4, res, code1, code2, code3);
 	}
+	else if(strcmp(first->unit, "Exp") == 0) {
+		if((strcmp(second->unit, "RELOP") == 0) || (strcmp(second->unit, "AND") == 0) || (strcmp(second->unit, "OR") == 0)) {
+			// Exp -> Exp RELOP/AND/OR Exp
+			Operand label1 = new_label();
+			Operand label2 = new_label();
+			
+			Operand op0 = new_op(CONSTANT, 0);
+			res = new_code(ASSIGN, place, op0);
+
+			// code1
+			InterCode code1 = translate_Cond(tr, label1, label2);
+
+			// code2
+			InterCode code2 = new_code(LABEL, label1);
+			code2 = merge_code(2, code2, new_code(ASSIGN, place, new_op(CONSTANT, 1)));
+
+			// code3
+			InterCode code3 = new_code(LABEL, label2);
+
+			return merge_code(4, res, code1, code2, code3);
+		}
+		else if(strcmp(second->unit, "ASSIGNOP") == 0) {
+			// Exp -> Exp ASSIGNOP Exp
+			SymNode variable = check_sym_table(first->child->name);
+			if(variable == NULL) {
+				printf("Why NULL? Exp -> ID\n");
+				return NULL;
+			}
+			else {
+				Operand op = new_op(VARIABLE, variable->no);
+				Operand t1 = new_temp();
+				InterCode code1 = translate_Exp(second->next, t1);
+				InterCode code2 = new_code(ASSIGN, op, t1);
+				InterCode code3 = new_code(ASSIGN, place, op);
+				res = merge_code(3, code1, code2, code3);
+				return res;
+			}
+		}
+		else if((strcmp(second->unit, "PLUS") == 0) || (strcmp(second->unit, "MINUS") == 0) || (strcmp(second->unit, "STAR") == 0) || (strcmp(second->unit, "DIV") == 0)) {
+			Operand t1 = new_temp();
+			Operand t2 = new_temp();
+			InterCode code1 = translate_Exp(first, t1);
+			InterCode code2 = translate_Exp(second->next, t2);
+			InterCode code3;
+			if((strcmp(second->unit, "PLUS") == 0)) {
+				// Exp -> Exp PLUS Exp
+				code3 = new_code(ADD, place, t1, t2);
+			}
+			else if((strcmp(second->unit, "MINUS") == 0)) {
+				// Exp -> Exp MINUS Exp
+				code3 = new_code(SUB, place, t1, t2);
+			}
+			else if((strcmp(second->unit, "STAR") == 0)) {
+				// Exp -> Exp STAR Exp
+				code3 = new_code(MUL, place, t1, t2);
+			}
+			else {
+				// Exp -> Exp DIV Exp
+				code3 = new_code(DIV, place, t1, t2);
+			}
+			res = merge_code(3, code1, code2, code3);
+			return res;
+		}
+	}
+	return NULL;
+}
+
+InterCode translate_Cond(TreeNode tr, Operand label_true, Operand label_false) {
+
+}
+
+InterCode translate_Args(TreeNode tr, Operand arg_list) {
+	// TreeNode first = tr->child;
+	// TreeNode second = first->next;
+	// if(second == NULL) {
+	// 	// Args -> Exp
+	// 	Operand t1 = new_temp();
+	// 	InterCode code1 = 
+	// }
 }

@@ -14,7 +14,7 @@ enum R_KIND{
 };
 
 enum O_KIND{
-		VARIABLE, CONSTANT, TEMP, O_LABEL, FUNCTION, 
+		VARIABLE, CONSTANT, TEMP, O_LABEL, 
 };
 
 enum I_KIND{
@@ -38,12 +38,13 @@ struct Operand_ {
 	union {
 		int var_no;
 		int value;
-		//char *name;
+		char name[20];
 		struct {
 			int temp_no;
 			char name[5];
 			Operand prev;
 			Operand next;
+			int ifparam;
 		} temp;
 		struct {
 			int label_no;
@@ -60,7 +61,7 @@ struct InterCode_ {
 		struct { Operand result, op1, op2; } binop;						/* ADD, SUB, MUL, DIV */
 		struct { Operand re1, re2, label; enum R_KIND kind; } ifgoto;	/* IFGOTO */
 		struct { Operand dec; int size; } dec;							/* DEC */
-		struct { Operand ret, func; } call;								/* CALL */
+		struct { Operand ret; char name[20]; } call;					/* CALL */
 	} u;
 	InterCode prev;
 	InterCode next;
@@ -83,5 +84,7 @@ InterCode new_code(enum I_KIND kind, ...);
 InterCode merge_code(int n, InterCode code1, InterCode code2, ...);
 
 InterCode translate_Exp(TreeNode tr, Operand place);
+InterCode translate_Cond(TreeNode tr, Operand label_true, Operand label_false);
+InterCode translate_Args(TreeNode tr, Operand arg_list);
 
 #endif
