@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdarg.h>
 #include "syntaxtree.h"
 #include "sym_table.h"
 
@@ -79,8 +80,8 @@ Operand new_temp();
 Operand new_label();
 
 Operand new_op(enum O_KIND kind);
-InterCode new_code(enum I_KIND kind);
-InterCode merge_code(InterCode code1, InterCode code2);
+InterCode new_code(enum I_KIND kind, ...);
+InterCode merge_code(int n, InterCode code1, InterCode code2, ...);
 
 InterCode translate_Exp(TreeNode tr, Operand place);
 
