@@ -29,6 +29,18 @@ Operand new_label() {
 Operand new_op(enum O_KIND kind) {
 	Operand op = malloc(sizeof(struct Operand_));
 	op->kind = kind;
+	va_list argptr;
+	va_start(argptr, kind);
+	switch(kind) {
+		case CONSTANT:
+			op->u.value = va_arg(argptr, int);
+			break;
+		case VARIABLE:
+			op->u.var_no = va_arg(argptr, int);
+			break;
+		case FUNCTION: break;
+		default: break;
+	}
 	return op;
 }
 
@@ -51,6 +63,9 @@ InterCode new_code(enum I_KIND kind, ...) {
 			code->u.single.op = va_arg(argptr, Operand);
 			break;
 		case ASSIGN:
+		case CITE:
+		case GETPOINTER:
+		case ASSIGNPOINTER:
 			code->u.assign.result = va_arg(argptr, Operand);
 			code->u.assign.op = va_arg(argptr, Operand); 
 			break;
@@ -99,8 +114,7 @@ InterCode translate_Exp(TreeNode tr, Operand place) {
 	if(strcmp(first->unit, "INT") == 0) {
 		// Exp -> INT
 		int value = (int)first->val;
-		Operand op = new_op(CONSTANT);
-		op->u.value = value;
+		Operand op = new_op(CONSTANT, value);
 		// res->kind = ASSIGN;
 		// res->u.assign.result = place;
 		// res->u.assign.op = op;
@@ -115,8 +129,7 @@ InterCode translate_Exp(TreeNode tr, Operand place) {
 			return NULL;
 		}
 		else {
-			Operand op = new_op(VARIABLE);
-			op->u.var_no = variable->no;
+			Operand op = new_op(VARIABLE, variable->no);
 			// res->kind = ASSIGN;
 			// res->u.assign.result = place;
 			// res->u.assign.op = op;
@@ -128,14 +141,13 @@ InterCode translate_Exp(TreeNode tr, Operand place) {
 		// Exp -> MINUS Exp
 		Operand t1 = new_temp(); 
 		InterCode code1 = translate_Exp(second, t1);
-		Operand zero = new_op(CONSTANT);
-		zero->u.value = 0;
+		Operand zero = new_op(CONSTANT, 0);
 		// res = new_code(SUB);
 		// res->u.binop.result = place;
 		// res->u.binop.op1 = zero;
 		// res->u.binop.op2 = t1;
 		res = new_code(SUB, place, zero, t1);
-		return merge_code(code1, res);
+		return merge_code(2, code1, res);
 	}
 	else if(strcmp(first->unit, "NOT") == 0) {
 		// Exp -> NOT Exp
@@ -143,8 +155,7 @@ InterCode translate_Exp(TreeNode tr, Operand place) {
 		Operand label2 = new_label();
 
 		// code0
-		Operand op0 = new_op(CONSTANT);
-		op0->u.value = 0;
+		Operand op0 = new_op(CONSTANT, 0);
 		// res->kind = ASSIGN;
 		// res->u.assign.result = place;
 		// res->u.assign.op = op0;

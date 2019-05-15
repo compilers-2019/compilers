@@ -14,14 +14,13 @@ enum R_KIND{
 };
 
 enum O_KIND{
-		VARIABLE, CONSTANT, ADDRESS, POINTER, 
-		TEMP, O_LABEL, FUNCTION, 
+		VARIABLE, CONSTANT, TEMP, O_LABEL, FUNCTION, 
 };
 
 enum I_KIND{
 		LABEL, FUNC, ASSIGN, ADD, 
-		SUB, MUL, DIV, /* CITE, 
-		GETPOINTER, ASSIGNPOINTER, */ GOTO, IFGOTO, 
+		SUB, MUL, DIV, CITE, 
+		GETPOINTER, ASSIGNPOINTER, GOTO, IFGOTO, 
 		RETURN, DEC, ARG, CALL, 
 		PARAM, READ, WRITE, 
 };
@@ -57,8 +56,8 @@ struct InterCode_ {
 	enum I_KIND kind;
 	union {
 		struct { Operand op; } single; 									/* LABEL, FUNCTION, GOTO, RETURN, ARG, PARAM, READ, WRITE */
-		struct { Operand result, op; } assign;							/* ASSIGN, GETPOINTER, ASSIGNPOINTER */
-		struct { Operand result, op1, op2; } binop;						/* ADD, SUB, MUL, DIV, CITE */
+		struct { Operand result, op; } assign;							/* ASSIGN, CITE, GETPOINTER, ASSIGNPOINTER */
+		struct { Operand result, op1, op2; } binop;						/* ADD, SUB, MUL, DIV */
 		struct { Operand re1, re2, label; enum R_KIND kind; } ifgoto;	/* IFGOTO */
 		struct { Operand dec; int size; } dec;							/* DEC */
 		struct { Operand ret, func; } call;								/* CALL */
