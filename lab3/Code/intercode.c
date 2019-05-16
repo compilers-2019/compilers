@@ -96,6 +96,7 @@ InterCode new_code(enum I_KIND kind, ...) {
 			break;
 		default: break;
 	}
+	//print_code(code);
 	return code;
 }
 
@@ -374,9 +375,12 @@ InterCode translate_Exp(TreeNode tr, Operand place) {
 				Operand op = new_op(VARIABLE, variable->no);
 				Operand t1 = new_temp();
 				InterCode code1 = translate_Exp(second->next, t1);
+				//printf("Here?\n");
 				InterCode code2 = new_code(ASSIGN, op, t1);
-				InterCode code3 = new_code(ASSIGN, place, op);
-				res = merge_code(3, code1, code2, code3);
+				if(place != NULL) {
+					code2 = merge_code(2, code2, new_code(ASSIGN, place, op));
+				}
+				res = merge_code(2, code1, code2);
 				return res;
 			}
 		}
@@ -767,139 +771,145 @@ void print_op(Operand op) {
 			break;
 		default: break;
 	}
+	//printf("OK!");
 }
 
-void print_code() {
+void print_code(InterCode code) {
+	//printf("Start!");
+	//printf("code type: %d: ", code->kind);
+	switch(code->kind) {
+		case LABEL:
+			printf("LABEL ");
+			print_op(code->u.single.op);
+			printf(" :\n");
+			break;
+		case FUNC:
+			printf("FUNCTION %s :\n", code->u.func.name);
+			break;
+		case ASSIGN:
+			print_op(code->u.assign.result);
+			printf(" := ");
+			print_op(code->u.assign.op);
+			printf("\n");
+			break;
+		case ADD:
+			print_op(code->u.binop.result);
+			printf(" := ");
+			print_op(code->u.binop.op1);
+			printf(" + ");
+			print_op(code->u.binop.op2);
+			printf("\n");
+			break;
+		case SUB:
+			print_op(code->u.binop.result);
+			printf(" := ");
+			print_op(code->u.binop.op1);
+			printf(" - ");
+			print_op(code->u.binop.op2);
+			printf("\n");
+			break;
+		case MUL:
+			print_op(code->u.binop.result);
+			printf(" := ");
+			print_op(code->u.binop.op1);
+			printf(" * ");
+			print_op(code->u.binop.op2);
+			printf("\n");
+			break;
+		case DIV:
+			print_op(code->u.binop.result);
+			printf(" := ");
+			print_op(code->u.binop.op1);
+			printf(" / ");
+			print_op(code->u.binop.op2);
+			printf("\n");
+			break;
+		case CITE:
+			print_op(code->u.assign.result);
+			printf(" := &");
+			print_op(code->u.assign.op);
+			printf("\n");
+			break;
+		case GETPOINTER:
+			print_op(code->u.assign.result);
+			printf(" := *");
+			print_op(code->u.assign.op);
+			printf("\n");
+			break;
+		case ASSIGNPOINTER:
+			printf("*");
+			print_op(code->u.assign.result);
+			printf(" := ");
+			print_op(code->u.assign.op);
+			printf("\n");
+			break;
+		case GOTO:
+			printf("GOTO ");
+			print_op(code->u.single.op);
+			printf("\n");
+			break;
+		case IFGOTO:
+			printf("IF ");
+			print_op(code->u.ifgoto.re1);
+			printf(" ");
+			switch(code->u.ifgoto.kind) {
+				case G: printf(">"); break;
+				case GE: printf(">="); break;
+				case L: printf("<"); break;
+				case LE: printf("<="); break;
+				case E: printf("=="); break;
+				case NE: printf("!="); break;
+				default: break;
+			}
+			printf(" ");
+			print_op(code->u.ifgoto.re2);
+			printf(" GOTO ");
+			print_op(code->u.ifgoto.label);
+			printf("\n");
+			break;
+		case RETURN:
+			printf("RETURN ");
+			print_op(code->u.single.op);
+			printf("\n");
+			break;
+		case DEC:
+			printf("DEC ");
+			print_op(code->u.dec.dec);
+			printf(" %d\n", code->u.dec.size);
+			break;
+		case ARG:
+			printf("ARG ");
+			print_op(code->u.single.op);
+			printf("\n");
+			break;
+		case CALL:
+			print_op(code->u.call.ret);
+			printf(" := CALL %s\n", code->u.call.name);
+			break;
+		case PARAM:
+			printf("PARAM ");
+			print_op(code->u.single.op);
+			printf("\n");
+			break;
+		case READ:
+			printf("READ ");
+			print_op(code->u.single.op);
+			printf("\n");
+			break;
+		case WRITE:
+			printf("WRITE ");
+			print_op(code->u.single.op);
+			printf("\n");
+			break;
+		default: break;
+	}
+	//printf("OK!\n");
+}
+
+void print_codeTree() {
 	InterCode code = codeRoot;
 	while(code != NULL) {
-		printf("Start!");
-		printf("code type: %d: ", code->kind);
-		switch(code->kind) {
-			case LABEL:
-				printf("LABEL ");
-				print_op(code->u.single.op);
-				printf(" :\n");
-				break;
-			case FUNC:
-				printf("FUNCTION %s :\n", code->u.func.name);
-				break;
-			case ASSIGN:
-				print_op(code->u.assign.result);
-				printf(" := ");
-				print_op(code->u.assign.op);
-				printf("\n");
-				break;
-			case ADD:
-				print_op(code->u.binop.result);
-				printf(" := ");
-				print_op(code->u.binop.op1);
-				printf(" + ");
-				print_op(code->u.binop.op2);
-				printf("\n");
-				break;
-			case SUB:
-				print_op(code->u.binop.result);
-				printf(" := ");
-				print_op(code->u.binop.op1);
-				printf(" - ");
-				print_op(code->u.binop.op2);
-				printf("\n");
-				break;
-			case MUL:
-				print_op(code->u.binop.result);
-				printf(" := ");
-				print_op(code->u.binop.op1);
-				printf(" * ");
-				print_op(code->u.binop.op2);
-				printf("\n");
-				break;
-			case DIV:
-				print_op(code->u.binop.result);
-				printf(" := ");
-				print_op(code->u.binop.op1);
-				printf(" / ");
-				print_op(code->u.binop.op2);
-				printf("\n");
-				break;
-			case CITE:
-				print_op(code->u.assign.result);
-				printf(" := &");
-				print_op(code->u.assign.op);
-				printf("\n");
-				break;
-			case GETPOINTER:
-				print_op(code->u.assign.result);
-				printf(" := *");
-				print_op(code->u.assign.op);
-				printf("\n");
-				break;
-			case ASSIGNPOINTER:
-				printf("*");
-				print_op(code->u.assign.result);
-				printf(" := ");
-				print_op(code->u.assign.op);
-				printf("\n");
-				break;
-			case GOTO:
-				printf("GOTO ");
-				print_op(code->u.single.op);
-				printf("\n");
-				break;
-			case IFGOTO:
-				printf("IF ");
-				print_op(code->u.ifgoto.re1);
-				printf(" ");
-				switch(code->u.ifgoto.kind) {
-					case G: printf(">"); break;
-					case GE: printf(">="); break;
-					case L: printf("<"); break;
-					case LE: printf("<="); break;
-					case E: printf("=="); break;
-					case NE: printf("!="); break;
-					default: break;
-				}
-				printf(" ");
-				print_op(code->u.ifgoto.re2);
-				printf(" GOTO ");
-				print_op(code->u.ifgoto.label);
-				printf("\n");
-				break;
-			case RETURN:
-				printf("RETURN ");
-				print_op(code->u.single.op);
-				printf("\n");
-				break;
-			case DEC:
-				printf("DEC ");
-				print_op(code->u.dec.dec);
-				printf(" %d\n", code->u.dec.size);
-				break;
-			case ARG:
-				printf("ARG ");
-				print_op(code->u.single.op);
-				printf("\n");
-				break;
-			case CALL:
-				print_op(code->u.call.ret);
-				printf(" := CALL %s\n", code->u.call.name);
-				break;
-			case PARAM:
-				printf("PARAM ");
-				print_op(code->u.single.op);
-				printf("\n");
-				break;
-			case READ:
-				printf("READ ");
-				print_op(code->u.single.op);
-				printf("\n");
-				break;
-			case WRITE:
-				printf("WRITE ");
-				print_op(code->u.single.op);
-				printf("\n");
-				break;
-			default: break;
-		}
+		print_code(code);
 		code = code->next;
 		//printf("OK!\n");
 	}

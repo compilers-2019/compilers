@@ -104,6 +104,7 @@ InterCode translate_Args(TreeNode tr, Operand arg_list);
 InterCode translate_Cond(TreeNode tr, Operand label_true, Operand label_false);
 
 void print_op(Operand op);
-void print_code();
+void print_code(InterCode code);
+void print_codeTree();
 
 #endif

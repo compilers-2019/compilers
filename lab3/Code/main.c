@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
 			start(root);
 			printTable();
 			translate_Program(root);
-			print_code();
+			print_codeTree();
 		}
 		return 0;
 
