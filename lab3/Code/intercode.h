@@ -38,7 +38,7 @@ struct Operand_ {
 	union {
 		int var_no;
 		int value;
-		char name[20];
+		// char name[20];
 		struct {
 			int temp_no;
 			char name[5];
@@ -55,7 +55,8 @@ struct Operand_ {
 struct InterCode_ {
 	enum I_KIND kind;
 	union {
-		struct { Operand op; } single; 									/* LABEL, FUNCTION, GOTO, RETURN, ARG, PARAM, READ, WRITE */
+		struct { char name[20]; } func;									/* FUNC */
+		struct { Operand op; } single; 									/* LABEL, GOTO, RETURN, ARG, PARAM, READ, WRITE */
 		struct { Operand result, op; } assign;							/* ASSIGN, CITE, GETPOINTER, ASSIGNPOINTER */
 		struct { Operand result, op1, op2; } binop;						/* ADD, SUB, MUL, DIV */
 		struct { Operand re1, re2, label; enum R_KIND kind; } ifgoto;	/* IFGOTO */
@@ -82,9 +83,27 @@ Operand new_op(enum O_KIND kind, ...);
 InterCode new_code(enum I_KIND kind, ...);
 InterCode merge_code(int n, InterCode code1, InterCode code2, ...);
 
-InterCode translate_Exp(TreeNode tr, Operand place);
+void translate_Program(TreeNode tr);
+InterCode translate_ExtDefList(TreeNode tr);
+InterCode translate_ExtDef(TreeNode tr);
+
+InterCode translate_FunDec(TreeNode tr);
+
 InterCode translate_Compst(TreeNode tr);
-InterCode translate_Cond(TreeNode tr, Operand label_true, Operand label_false);
+InterCode translate_StmtList(TreeNode tr);
+InterCode translate_Stmt(TreeNode tr);
+
+InterCode translate_DefList(TreeNode tr);
+InterCode translate_Def(TreeNode tr);
+InterCode translate_DecList(TreeNode tr);
+InterCode translate_Dec(TreeNode tr);
+
+InterCode translate_Exp(TreeNode tr, Operand place);
 InterCode translate_Args(TreeNode tr, Operand arg_list);
+
+InterCode translate_Cond(TreeNode tr, Operand label_true, Operand label_false);
+
+void print_op(Operand op);
+void print_code();
 
 #endif

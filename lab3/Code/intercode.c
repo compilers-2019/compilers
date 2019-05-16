@@ -53,8 +53,10 @@ InterCode new_code(enum I_KIND kind, ...) {
 	va_list argptr;
 	va_start(argptr, kind);
 	switch(kind) {
-		case LABEL:
 		case FUNC:
+			strcpy(code->u.func.name, va_arg(argptr, char*));
+			break;
+		case LABEL:
 		case GOTO:
 		case RETURN:
 		case ARG:
@@ -97,35 +99,123 @@ InterCode new_code(enum I_KIND kind, ...) {
 	return code;
 }
 
+// InterCode merge_code(int n,InterCode code1,InterCode code2, ...)
+// {
+// 	va_list parg;
+// 	va_start(parg,code2);
+// 	InterCode cur = code1;
+// 	while(cur->next != NULL) {
+// 		cur = cur->next;
+// 	}
+// 	cur->next = code2;
+// 	code2->prev = cur;
+// 	n=n-2;
+// 	while(n>0)
+// 	{
+// 		InterCode code = va_arg(parg, InterCode);
+// 		InterCode cur = code1;
+// 		while(cur->next != NULL) 
+// 		{
+// 			cur = cur->next;
+// 		}
+// 		cur->next = code;
+// 		code->prev = cur;
+// 		n--;
+// 	}
+// 	va_end(parg);
+// 	return code1;
+
+// }
 InterCode merge_code(int n,InterCode code1,InterCode code2, ...)
 {
-	va_list parg;
-	va_start(parg,code2);
-	InterCode cur = code1;
-	while(cur->next != NULL) {
-		cur = cur->next;
-	}
-	cur->next = code2;
-	code2->prev = cur;
-	n=n-2;
-	while(n>0)
+	if(n==2)
 	{
-		InterCode code = va_arg(parg, InterCode);
-		InterCode cur = code1;
-		while(cur->next != NULL) 
+		if(code1==NULL)
 		{
-			cur = cur->next;
+			if(code2==NULL)
+				return NULL;
+			else
+			{
+				return code2;
+			}
+			
 		}
-		cur->next = code;
-		code->prev = cur;
-		n--;
+		else
+		{
+			if(code2==NULL)
+				return code1;
+			else
+			{
+				InterCode cur = code1;
+				while(cur->next != NULL) {
+					cur = cur->next;
+				}
+				cur->next = code2;
+				code2->prev = cur;
+				return code1;
+			}
+			
+		}	
 	}
-	va_end(parg);
-	return code1;
+	else 
+	{
+		va_list parg;
+		va_start(parg,code2);
+		if(code1==NULL)
+		{
+			if(code2==NULL)
+			{
+				//code1=NULL;
+			}
+			else
+			{
+				code1=code2;
+			}
+		}
+		else
+		{
+			if(code2==NULL)
+			{
 
+			}
+			else
+			{
+				InterCode cur = code1;
+				while(cur->next != NULL) 
+				{
+					cur = cur->next;
+				}
+				cur->next = code2;
+				code2->prev = cur;
+			}
+			n=n-2;
+			while(n>0)
+			{
+				InterCode code = va_arg(parg, InterCode);
+				if(code==NULL)
+				{
+					n--;
+				}
+				else
+				{
+					InterCode cur = code1;
+					while(cur->next != NULL) 
+					{
+						cur = cur->next;
+					}
+					cur->next = code;
+					code->prev = cur;
+					n--;
+				}	
+			}
+		}
+		va_end(parg);
+		return code1;	
+	}
 }
 
 InterCode translate_Exp(TreeNode tr, Operand place) {
+	printf("translate_Exp.\n");
 	TreeNode first = tr->child;
 	TreeNode second = first->next;
 	InterCode res;
@@ -170,7 +260,10 @@ InterCode translate_Exp(TreeNode tr, Operand place) {
 					Operand arg_list = new_temp();
 					InterCode code1 = translate_Args(third, arg_list);
 					if(strcmp(func->name, "write") == 0) {
-						res = merge_code(2, code1, new_code(WRITE, arg_list->u.temp.next));
+						InterCode code2 = new_code(WRITE, arg_list->u.temp.next);
+						// printf("Args identified successfully.\n");
+						// printf("WRITE %s\n", code2->u.single.op->u.temp.name);
+						res = merge_code(2, code1, code2);
 					}
 					else {
 						Operand cur = arg_list->u.temp.next;
@@ -305,12 +398,14 @@ InterCode translate_Exp(TreeNode tr, Operand place) {
 	}
 	return NULL;
 }
+
 InterCode translate_Stmt(TreeNode tr)
 {
+	printf("translate_Stmt.\n");
 	TreeNode first=tr->child;
 	TreeNode second=first->next;
 	//InterCode res;
-	if(strcmp(first->unit,"EXP")==0)
+	if(strcmp(first->unit,"Exp")==0)
 	{
 		//Stmt -> Exp SEMI
 		return translate_Exp(first,NULL);
@@ -409,6 +504,7 @@ InterCode translate_Stmt(TreeNode tr)
 
 InterCode translate_Cond(TreeNode tr,Operand label_true,Operand label_false)
 {
+	printf("translate_Cond.\n");
 	TreeNode first=tr->child;
 	TreeNode second=first->next;
 	if(strcmp(first->unit,"Exp")==0)
@@ -484,7 +580,7 @@ InterCode translate_Cond(TreeNode tr,Operand label_true,Operand label_false)
 		InterCode code2=new_code(IFGOTO,t1,op,label_true, NE);
 		//[GOTO label_false]
 		InterCode temp=new_code(GOTO,label_false);
-		return merge(code1,code2,temp);
+		return merge_code(3, code1,code2,temp);
 	}
 	
 	
@@ -492,6 +588,7 @@ InterCode translate_Cond(TreeNode tr,Operand label_true,Operand label_false)
 
 
 InterCode translate_Args(TreeNode tr, Operand arg_list) {
+	printf("translate_Args.\n");
 	TreeNode first = tr->child;
 	TreeNode second = first->next;
 	Operand t1 = new_temp();
@@ -502,6 +599,7 @@ InterCode translate_Args(TreeNode tr, Operand arg_list) {
 	}
 	cur->u.temp.next = t1;
 	t1->u.temp.prev = cur;
+	// printf("Args identified successfully.\n");
 	// Args -> Exp
 	if(second != NULL) {
 		// Args -> Exp COMMA Args
@@ -509,4 +607,283 @@ InterCode translate_Args(TreeNode tr, Operand arg_list) {
 		code1 = merge_code(2, code1, code2);
 	}
 	return code1;
+}
+
+
+
+void translate_Program(TreeNode tr) {
+	printf("translate_Program.\n");
+	codeRoot = translate_ExtDefList(tr->child);
+}
+
+InterCode translate_ExtDefList(TreeNode tr) {
+	printf("translate_ExtDefList.\n");
+	TreeNode first = tr->child;
+	if(first != NULL) {
+		InterCode code1 = translate_ExtDef(first);
+		InterCode code2 = translate_ExtDefList(first->next);
+		return merge_code(2, code1, code2);
+	}
+	else {
+		return NULL;
+	}
+}
+
+InterCode translate_ExtDef(TreeNode tr) {
+	printf("translate_ExtDef.\n");
+	TreeNode second = tr->child->next;
+	if(strcmp(second->unit, "ExtDecList") == 0) {
+		// global variable
+		return NULL;
+	}
+	else if(strcmp(second->unit, "SEMI") == 0) {
+		return NULL;
+	}
+	else {
+		// ExtDef -> Specifier FunDec CompSt
+		InterCode code1 = translate_FunDec(second);
+		InterCode code2 = translate_Compst(second->next);
+		return merge_code(2, code1, code2);
+	}
+}
+
+InterCode translate_FunDec(TreeNode tr) {
+	printf("translate_FunDec.\n");
+	TreeNode first = tr->child;
+	FuncNode func = check_func_table(first->name);
+	if(func == NULL) {
+		printf("Why NULL? In translate_FunDec.\n");
+		return NULL;
+	}
+	else {
+		return new_code(FUNC, func->name);
+	}
+}
+
+InterCode translate_Compst(TreeNode tr) {
+	printf("translate_CompSt.\n");
+	TreeNode second = tr->child->next;
+	TreeNode third = second->next;
+	InterCode code1 = translate_DefList(second);
+	InterCode code2 = translate_StmtList(third);
+	return merge_code(2, code1, code2);
+}
+
+InterCode translate_StmtList(TreeNode tr) {
+	printf("translate_StmtList.\n");
+	TreeNode first = tr->child;
+	if(first != NULL) {
+		InterCode code1 = translate_Stmt(first);
+		InterCode code2 = translate_StmtList(first->next);
+		return merge_code(2, code1, code2);
+	}
+	else {
+		return NULL;
+	}
+}
+
+InterCode translate_DefList(TreeNode tr) {
+	printf("translate_DefList.\n");
+	TreeNode first = tr->child;
+	if(first != NULL) {
+		InterCode code1 = translate_Def(first);
+		InterCode code2 = translate_DefList(first->next);
+		return merge_code(2, code1, code2);
+	}
+	else {
+		return NULL;
+	}
+}
+
+InterCode translate_Def(TreeNode tr) {
+	printf("translate_Def.\n");
+	return translate_DecList(tr->child->next);
+}
+
+InterCode translate_DecList(TreeNode tr) {
+	printf("translate_DecList.\n");
+	TreeNode first = tr->child;
+	InterCode code = translate_Dec(first);
+	if(first->next != NULL) {
+		code = merge_code(2, code, translate_DecList(first->next->next));
+	}
+	return code;
+}
+
+InterCode translate_Dec(TreeNode tr) {
+	printf("translate_Dec.\n");
+	TreeNode first = tr->child;
+	if(first->next == NULL) {
+		return NULL;
+	}
+	else {
+		// Dec -> VarDec ASSIGNOP Exp
+		// For the time being, assume VarDec -> ID
+		SymNode variable = check_sym_table(first->child->name);
+		if(variable == NULL) {
+			printf("Why NULL? In translate_Dec.\n");
+			return NULL;
+		}
+		else {
+			Operand v1 = new_op(VARIABLE, variable->no);
+			Operand t1 = new_temp();
+			InterCode code2 = translate_Exp(first->next->next, t1);
+			InterCode code1 = new_code(ASSIGN, v1, t1);
+			return merge_code(2, code1, code2);
+		}
+	}
+}
+
+void print_op(Operand op) {
+	switch(op->kind) {
+		case VARIABLE:
+			printf("%s", sym_table[op->u.var_no]->name);
+			break;
+		case CONSTANT:
+			printf("#%d", op->u.value);
+			break;
+		case TEMP:
+			printf("%s", op->u.temp.name);
+			break;
+		case O_LABEL:
+			printf("%s", op->u.label.name);
+			break;
+		default: break;
+	}
+}
+
+void print_code() {
+	InterCode code = codeRoot;
+	while(code != NULL) {
+		printf("Start!");
+		printf("code type: %d: ", code->kind);
+		switch(code->kind) {
+			case LABEL:
+				printf("LABEL ");
+				print_op(code->u.single.op);
+				printf(" :\n");
+				break;
+			case FUNC:
+				printf("FUNCTION %s :\n", code->u.func.name);
+				break;
+			case ASSIGN:
+				print_op(code->u.assign.result);
+				printf(" := ");
+				print_op(code->u.assign.op);
+				printf("\n");
+				break;
+			case ADD:
+				print_op(code->u.binop.result);
+				printf(" := ");
+				print_op(code->u.binop.op1);
+				printf(" + ");
+				print_op(code->u.binop.op2);
+				printf("\n");
+				break;
+			case SUB:
+				print_op(code->u.binop.result);
+				printf(" := ");
+				print_op(code->u.binop.op1);
+				printf(" - ");
+				print_op(code->u.binop.op2);
+				printf("\n");
+				break;
+			case MUL:
+				print_op(code->u.binop.result);
+				printf(" := ");
+				print_op(code->u.binop.op1);
+				printf(" * ");
+				print_op(code->u.binop.op2);
+				printf("\n");
+				break;
+			case DIV:
+				print_op(code->u.binop.result);
+				printf(" := ");
+				print_op(code->u.binop.op1);
+				printf(" / ");
+				print_op(code->u.binop.op2);
+				printf("\n");
+				break;
+			case CITE:
+				print_op(code->u.assign.result);
+				printf(" := &");
+				print_op(code->u.assign.op);
+				printf("\n");
+				break;
+			case GETPOINTER:
+				print_op(code->u.assign.result);
+				printf(" := *");
+				print_op(code->u.assign.op);
+				printf("\n");
+				break;
+			case ASSIGNPOINTER:
+				printf("*");
+				print_op(code->u.assign.result);
+				printf(" := ");
+				print_op(code->u.assign.op);
+				printf("\n");
+				break;
+			case GOTO:
+				printf("GOTO ");
+				print_op(code->u.single.op);
+				printf("\n");
+				break;
+			case IFGOTO:
+				printf("IF ");
+				print_op(code->u.ifgoto.re1);
+				printf(" ");
+				switch(code->u.ifgoto.kind) {
+					case G: printf(">"); break;
+					case GE: printf(">="); break;
+					case L: printf("<"); break;
+					case LE: printf("<="); break;
+					case E: printf("=="); break;
+					case NE: printf("!="); break;
+					default: break;
+				}
+				printf(" ");
+				print_op(code->u.ifgoto.re2);
+				printf(" GOTO ");
+				print_op(code->u.ifgoto.label);
+				printf("\n");
+				break;
+			case RETURN:
+				printf("RETURN ");
+				print_op(code->u.single.op);
+				printf("\n");
+				break;
+			case DEC:
+				printf("DEC ");
+				print_op(code->u.dec.dec);
+				printf(" %d\n", code->u.dec.size);
+				break;
+			case ARG:
+				printf("ARG ");
+				print_op(code->u.single.op);
+				printf("\n");
+				break;
+			case CALL:
+				print_op(code->u.call.ret);
+				printf(" := CALL %s\n", code->u.call.name);
+				break;
+			case PARAM:
+				printf("PARAM ");
+				print_op(code->u.single.op);
+				printf("\n");
+				break;
+			case READ:
+				printf("READ ");
+				print_op(code->u.single.op);
+				printf("\n");
+				break;
+			case WRITE:
+				printf("WRITE ");
+				print_op(code->u.single.op);
+				printf("\n");
+				break;
+			default: break;
+		}
+		code = code->next;
+		//printf("OK!\n");
+	}
 }
