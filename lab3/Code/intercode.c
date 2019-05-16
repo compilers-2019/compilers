@@ -942,7 +942,7 @@ void print_code(InterCode code) {
 			 
 			printf("GOTO ");
 			fp=fopen("test.ir","a");
-			fputs("GOTO",fp);
+			fputs("GOTO ",fp);
 			fclose(fp);
 			print_op(code->u.single.op);
 			printf("\n");
