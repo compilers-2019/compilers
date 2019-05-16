@@ -35,22 +35,6 @@ syntax-c: $(YFILE)
 .PHONY: clean test
 test:
 	./parser ../Test/1.cmm
-	./parser ../Test/2.cmm
-	./parser ../Test/3.cmm
-	./parser ../Test/4.cmm
-	./parser ../Test/5.cmm
-	./parser ../Test/6.cmm
-	./parser ../Test/7.cmm
-	./parser ../Test/8.cmm
-	./parser ../Test/9.cmm
-	./parser ../Test/10.cmm
-	./parser ../Test/11.cmm
-	./parser ../Test/12.cmm
-	./parser ../Test/13.cmm
-	./parser ../Test/14.cmm
-	./parser ../Test/15.cmm
-	./parser ../Test/16.cmm
-	./parser ../Test/17.cmm
 clean:
 	rm -f parser lex.yy.c syntax.tab.c syntax.tab.h syntax.output
 	rm -f $(OBJS) $(OBJS:.o=.d)

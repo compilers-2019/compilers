@@ -188,12 +188,21 @@ InterCode merge_code(int n,InterCode code1,InterCode code2, ...)
 				cur->next = code2;
 				code2->prev = cur;
 			}
-			n=n-2;
-			while(n>0)
+		}
+		
+		n=n-2;
+		while(n>0)
+		{
+			InterCode code = va_arg(parg, InterCode);
+			if(code==NULL)
 			{
-				InterCode code = va_arg(parg, InterCode);
-				if(code==NULL)
-				{
+				n--;
+			}
+			else
+			{		
+				if(code1==NULL)
+				{	
+					code1=code;
 					n--;
 				}
 				else
@@ -206,9 +215,10 @@ InterCode merge_code(int n,InterCode code1,InterCode code2, ...)
 					cur->next = code;
 					code->prev = cur;
 					n--;
-				}	
-			}
+				}
+			}	
 		}
+		
 		va_end(parg);
 		return code1;	
 	}
@@ -219,7 +229,14 @@ InterCode translate_Exp(TreeNode tr, Operand place) {
 	TreeNode first = tr->child;
 	TreeNode second = first->next;
 	InterCode res;
-
+/*
+	Operand label1=new_label();
+	InterCode code2=new_code(LABEL,label1);
+	InterCode code1=new_code(LABEL,label1);
+	InterCode code3=new_code(LABEL,label1);
+	if(merge_code(3,code1,code2,code3)==code1)
+		printf("merge_codeOK!\n");
+*/
 	if(strcmp(first->unit, "INT") == 0) {
 		// Exp -> INT
 		int value = (int)first->val;

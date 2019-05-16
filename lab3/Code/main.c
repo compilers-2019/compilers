@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include "syntaxtree.h"
 #include "sym_table.h"
-
+//#include "intercode.h"
 //#ifdef YY_DEBUG
 //extern int yydebug;
 //#endif
@@ -32,13 +32,15 @@ int main(int argc, char** argv) {
 //#endif
 		yyparse();
 		if(signal) {
-				printTree();
-				start(root);
-				printTable();
-				translate_Program(root);
-				print_code();
+			
+			printTree();
+			start(root);
+			printTable();
+			translate_Program(root);
+			print_code();
 		}
 		return 0;
+
 }
 
 
