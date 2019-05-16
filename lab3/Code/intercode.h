@@ -8,7 +8,6 @@
 #include <stdarg.h>
 #include "syntaxtree.h"
 #include "sym_table.h"
-
 enum R_KIND{
 		G, GE, L, LE, E, NE, 
 };
