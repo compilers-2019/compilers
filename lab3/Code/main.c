@@ -14,6 +14,7 @@ extern void yyrestart(FILE* f);
 extern void printTree();
 extern void Program(TreeNode r);
 extern bool signal;
+extern bool codeSignal;
 extern char file_name[20];
 //extern struct TreeNode* current;
 
@@ -39,9 +40,10 @@ int main(int argc, char** argv) {
 			start(root);
 			printTable();
 			translate_Program(root);
-
 			strcpy(file_name, argv[2]);
-			print_codeTree();
+			if(codeSignal) {
+				print_codeTree();
+			}
 		}
 		return 0;
 

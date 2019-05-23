@@ -31,6 +31,8 @@ Operand new_label() {
 Operand new_op(enum O_KIND kind, ...) {
 	Operand op = malloc(sizeof(struct Operand_));
 	op->kind = kind;
+	op->if_pointer = false;
+	op->if_address = false;
 	va_list argptr;
 	va_start(argptr, kind);
 	switch(kind) {
@@ -253,7 +255,7 @@ InterCode translate_Exp(TreeNode tr, Operand place) {
 			// Exp -> ID
 			SymNode variable = check_sym_table(first->name);
 			if(variable == NULL) {
-				printf("Why NULL? Exp -> ID\n");
+				printf("Why NULL? Exp -> ID: %s\n", first->name);
 				return NULL;
 			}
 			else {
@@ -268,7 +270,7 @@ InterCode translate_Exp(TreeNode tr, Operand place) {
 		else {
 			FuncNode func = check_func_table(first->name);
 			if(func == NULL) {
-				printf("Why NULL? Exp -> ID LP (Args) RP\n");
+				printf("Why NULL? Exp -> ID LP (Args) RP: %s\n", first->name);
 				return NULL;
 			}
 			else {
@@ -344,7 +346,53 @@ InterCode translate_Exp(TreeNode tr, Operand place) {
 		return merge_code(4, res, code1, code2, code3);
 	}
 	else if(strcmp(first->unit, "Exp") == 0) {
-		if((strcmp(second->unit, "RELOP") == 0) || (strcmp(second->unit, "AND") == 0) || (strcmp(second->unit, "OR") == 0)) {
+		if(strcmp(second->unit, "LB") == 0) {
+			// Array, exit
+			printf("Cannot translate: Code contains variables of multi-dimensional array type or parameters of array type.\n");
+			codeSignal = false;
+			return NULL;
+		}
+		else if(strcmp(second->unit, "DOT") == 0) {
+			// Exp DOT ID
+			TreeNode third = second->next;
+			SymNode variable = check_sym_table(first->child->name);
+			if(variable == NULL) {
+				printf("Why NULL? Exp ->Exp DOT ID: %s\n", first->child->name);
+				return NULL;
+			}
+			else {
+				// printf("%s: ", variable->name);
+				// variable = variable->type->u.structure;
+				// printf("STRUCT %s\n", variable->name);
+				// variable = variable->struct_next;
+				// while(variable != NULL) {
+				// 	printf("%s\n", variable->name);
+				// 	variable = variable->struct_next;
+				// }
+				// return NULL;
+				int num = 0;
+				SymNode structure = variable->type->u.structure->struct_next;
+				while(strcmp(structure->name, third->name) != 0) {
+					num += 4;
+					structure = structure->struct_next;
+				}
+
+				if(num == 0) {
+					Operand op = new_op(VARIABLE, variable->no);
+					op->if_pointer = true;
+					return new_code(ASSIGN, place, op);
+				}
+				else {
+					Operand n = new_op(CONSTANT, num);
+					Operand op = new_op(VARIABLE, variable->no);
+					Operand t1 = new_temp();
+					InterCode code1 = new_code(ADD, t1, op, n);
+					InterCode code2 = new_code(GETPOINTER, place, t1);
+					return merge_code(2, code1, code2);
+				}
+			}
+		}
+		else if((strcmp(second->unit, "RELOP") == 0) || (strcmp(second->unit, "AND") == 0) || (strcmp(second->unit, "OR") == 0)) {
 			// Exp -> Exp RELOP/AND/OR Exp
 			Operand label1 = new_label();
 			Operand label2 = new_label();
@@ -366,22 +414,61 @@ InterCode translate_Exp(TreeNode tr, Operand place) {
 		}
 		else if(strcmp(second->unit, "ASSIGNOP") == 0) {
 			// Exp -> Exp ASSIGNOP Exp
-			SymNode variable = check_sym_table(first->child->name);
-			if(variable == NULL) {
-				printf("Why NULL? Exp -> ID\n");
-				return NULL;
+			res = NULL;
+			if(strcmp(first->child->unit, "Exp") == 0) {
+				// Next level: Exp -> Exp DOT ID
+				TreeNode next_level = first->child->next;
+				if(strcmp(next_level->unit, "DOT") == 0) {
+					SymNode variable = check_sym_table(first->child->child->name);
+					int num = 0;
+					SymNode structure = variable->type->u.structure->struct_next;
+					while(strcmp(structure->name, next_level->next->name) != 0) {
+						num += 4;
+						structure = structure->struct_next;
+					}
+					Operand t1 = new_temp();
+					Operand op = new_op(VARIABLE, variable->no);
+					op->if_address = true;
+					InterCode code1;
+					Operand n;
+					if(num == 0) {
+						code1 = new_code(ASSIGN, t1, op);
+					}
+					else {
+						n = new_op(CONSTANT, num);
+						code1 = new_code(ADD, t1, op, n);
+					}
+					printf("OK\n");
+					Operand t2 = new_temp();
+					InterCode code2 = translate_Exp(second->next, t2);
+					InterCode code3 = new_code(ASSIGNPOINTER, t1, t2);
+					return merge_code(3, code1, code2, code3);
+				}
+				else {
+					// Array, exit
+					printf("Cannot translate: Code contains variables of multi-dimensional array type or parameters of array type.\n");
+					codeSignal = false;
+					return NULL;
+				}
 			}
 			else {
-				Operand op = new_op(VARIABLE, variable->no);
-				Operand t1 = new_temp();
-				InterCode code1 = translate_Exp(second->next, t1);
-				//printf("Here?\n");
-				InterCode code2 = new_code(ASSIGN, op, t1);
-				if(place != NULL) {
-					code2 = merge_code(2, code2, new_code(ASSIGN, place, op));
+				SymNode variable = check_sym_table(first->child->name);
+				if(variable == NULL) {
+					printf("Why NULL? Exp -> ID: %s\n", first->child->name);
+					return NULL;
 				}
-				res = merge_code(2, code1, code2);
-				return res;
+				else {
+					Operand op = new_op(VARIABLE, variable->no);
+					Operand t1 = new_temp();
+					InterCode code1 = translate_Exp(second->next, t1);
+					//printf("Here?\n");
+					InterCode code2 = new_code(ASSIGN, op, t1);
+					if(place != NULL) {
+						code2 = merge_code(2, code2, new_code(ASSIGN, place, op));
+					}
+					res = merge_code(3, res, code1, code2);
+					return res;
+				}
 			}
 		}
 		else if((strcmp(second->unit, "PLUS") == 0) || (strcmp(second->unit, "MINUS") == 0) || (strcmp(second->unit, "STAR") == 0) || (strcmp(second->unit, "DIV") == 0)) {
@@ -538,7 +625,7 @@ InterCode translate_Cond(TreeNode tr,Operand label_true,Operand label_false)
 			if(strcmp(first->child->unit, "ID") == 0) {
 				SymNode variable = check_sym_table(first->child->name);
 				if(variable == NULL) {
-					printf("Why NULL? Cond\n");
+					printf("Why NULL? Cond: %s\n", first->child->name);
 					return NULL;
 				}
 				else {
@@ -553,7 +640,7 @@ InterCode translate_Cond(TreeNode tr,Operand label_true,Operand label_false)
 			if(strcmp(third->child->unit, "ID") == 0) {
 				SymNode variable = check_sym_table(third->child->name);
 				if(variable == NULL) {
-					printf("Why NULL? Cond\n");
+					printf("Why NULL? Cond: %s\n", first->child->name);
 					return NULL;
 				}
 				else {
@@ -701,7 +788,7 @@ InterCode translate_FunDec(TreeNode tr) {
 	TreeNode first = tr->child;
 	FuncNode func = check_func_table(first->name);
 	if(func == NULL) {
-		printf("Why NULL? In translate_FunDec.\n");
+		printf("Why NULL? In translate_FunDec: %s\n", first->name);
 		return NULL;
 	}
 	else {
@@ -716,6 +803,7 @@ InterCode translate_FunDec(TreeNode tr) {
 }
 
 InterCode translate_VarList(TreeNode tr) {
+	printf("translate_VarList.\n");
 	TreeNode first = tr->child;
 	InterCode res = translate_ParamDec(first);
 	if(first->next != NULL) {
@@ -726,10 +814,11 @@ InterCode translate_VarList(TreeNode tr) {
 }
 
 InterCode translate_ParamDec(TreeNode tr) {
+	printf("translate_ParamDec.\n");
 	TreeNode second = tr->child->next;
 	SymNode variable = check_sym_table(second->child->name);
 	if(variable == NULL) {
-		printf("Why NULL? In translate_Dec.\n");
+		printf("Why NULL? In translate_Dec: %s\n", second->child->name);
 		return NULL;
 	}
 	else {
@@ -799,7 +888,7 @@ InterCode translate_Dec(TreeNode tr) {
 		// For the time being, assume VarDec -> ID
 		SymNode variable = check_sym_table(first->child->name);
 		if(variable == NULL) {
-			printf("Why NULL? In translate_Dec.\n");
+			printf("Why NULL? In translate_Dec: %s\n", first->child->name);
 			return NULL;
 		}
 		else {
@@ -816,7 +905,14 @@ void print_op(Operand op) {
 	//FILE *fp=NULL;
 	switch(op->kind) {
 		case VARIABLE:
-			 
+			if(op->if_pointer == true) {
+				printf("*");
+				fprintf(fp, "*");
+			}
+			else if(op->if_address == true) {
+				printf("&");
+				fprintf(fp, "&");
+			}
 			printf("%s", sym_table[op->u.var_no]->name);
 			//fputs(sym_table[op->u.var_no]->name,fp);
 			//fp=fopen(file_name,"a");

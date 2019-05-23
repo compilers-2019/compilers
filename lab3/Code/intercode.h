@@ -9,6 +9,7 @@
 #include "syntaxtree.h"
 #include "sym_table.h"
 
+bool codeSignal = true;
 char file_name[20];
 FILE *fp = NULL;
 
@@ -53,6 +54,8 @@ struct Operand_ {
 			char name[5];
 		} label;
 	} u;
+	bool if_pointer;
+	bool if_address;
 };
 
 struct InterCode_ {
