@@ -228,7 +228,7 @@ InterCode merge_code(int n,InterCode code1,InterCode code2, ...)
 }
 
 InterCode translate_Exp(TreeNode tr, Operand place) {
-	printf("translate_Exp.\n");
+	//printf("translate_Exp.\n");
 	TreeNode first = tr->child;
 	TreeNode second = first->next;
 	InterCode res;
@@ -255,7 +255,7 @@ InterCode translate_Exp(TreeNode tr, Operand place) {
 			// Exp -> ID
 			SymNode variable = check_sym_table(first->name);
 			if(variable == NULL) {
-				printf("Why NULL? Exp -> ID: %s\n", first->name);
+				//printf("Why NULL? Exp -> ID: %s\n", first->name);
 				return NULL;
 			}
 			else {
@@ -270,7 +270,7 @@ InterCode translate_Exp(TreeNode tr, Operand place) {
 		else {
 			FuncNode func = check_func_table(first->name);
 			if(func == NULL) {
-				printf("Why NULL? Exp -> ID LP (Args) RP: %s\n", first->name);
+				//printf("Why NULL? Exp -> ID LP (Args) RP: %s\n", first->name);
 				return NULL;
 			}
 			else {
@@ -349,15 +349,16 @@ InterCode translate_Exp(TreeNode tr, Operand place) {
 		if(strcmp(second->unit, "LB") == 0) {
 			// Array, exit
 			printf("Cannot translate: Code contains variables of multi-dimensional array type or parameters of array type.\n");
-			codeSignal = false;
-			return NULL;
+			// codeSignal = false;
+			// return NULL;
+			exit(-1);
 		}
 		else if(strcmp(second->unit, "DOT") == 0) {
 			// Exp DOT ID
 			TreeNode third = second->next;
 			SymNode variable = check_sym_table(first->child->name);
 			if(variable == NULL) {
-				printf("Why NULL? Exp ->Exp DOT ID: %s\n", first->child->name);
+				//printf("Why NULL? Exp ->Exp DOT ID: %s\n", first->child->name);
 				return NULL;
 			}
 			else {
@@ -438,7 +439,7 @@ InterCode translate_Exp(TreeNode tr, Operand place) {
 						n = new_op(CONSTANT, num);
 						code1 = new_code(ADD, t1, op, n);
 					}
-					printf("OK\n");
+					//printf("OK\n");
 					Operand t2 = new_temp();
 					InterCode code2 = translate_Exp(second->next, t2);
 					InterCode code3 = new_code(ASSIGNPOINTER, t1, t2);
@@ -447,14 +448,15 @@ InterCode translate_Exp(TreeNode tr, Operand place) {
 				else {
 					// Array, exit
 					printf("Cannot translate: Code contains variables of multi-dimensional array type or parameters of array type.\n");
-					codeSignal = false;
-					return NULL;
+					// codeSignal = false;
+					// return NULL;
+					exit(-1);
 				}
 			}
 			else {
 				SymNode variable = check_sym_table(first->child->name);
 				if(variable == NULL) {
-					printf("Why NULL? Exp -> ID: %s\n", first->child->name);
+					//printf("Why NULL? Exp -> ID: %s\n", first->child->name);
 					return NULL;
 				}
 				else {
@@ -509,7 +511,7 @@ InterCode translate_Exp(TreeNode tr, Operand place) {
 
 InterCode translate_Stmt(TreeNode tr)
 {
-	printf("translate_Stmt.\n");
+	//printf("translate_Stmt.\n");
 	TreeNode first=tr->child;
 	TreeNode second=first->next;
 	//InterCode res;
@@ -612,7 +614,7 @@ InterCode translate_Stmt(TreeNode tr)
 
 InterCode translate_Cond(TreeNode tr,Operand label_true,Operand label_false)
 {
-	printf("translate_Cond.\n");
+	//printf("translate_Cond.\n");
 	TreeNode first=tr->child;
 	TreeNode second=first->next;
 	TreeNode third = second->next;
@@ -625,7 +627,7 @@ InterCode translate_Cond(TreeNode tr,Operand label_true,Operand label_false)
 			if(strcmp(first->child->unit, "ID") == 0) {
 				SymNode variable = check_sym_table(first->child->name);
 				if(variable == NULL) {
-					printf("Why NULL? Cond: %s\n", first->child->name);
+					//printf("Why NULL? Cond: %s\n", first->child->name);
 					return NULL;
 				}
 				else {
@@ -640,7 +642,7 @@ InterCode translate_Cond(TreeNode tr,Operand label_true,Operand label_false)
 			if(strcmp(third->child->unit, "ID") == 0) {
 				SymNode variable = check_sym_table(third->child->name);
 				if(variable == NULL) {
-					printf("Why NULL? Cond: %s\n", first->child->name);
+					//printf("Why NULL? Cond: %s\n", first->child->name);
 					return NULL;
 				}
 				else {
@@ -724,7 +726,7 @@ InterCode translate_Cond(TreeNode tr,Operand label_true,Operand label_false)
 
 
 InterCode translate_Args(TreeNode tr, Operand arg_list) {
-	printf("translate_Args.\n");
+	//printf("translate_Args.\n");
 	TreeNode first = tr->child;
 	TreeNode second = first->next;
 	Operand t1 = new_temp();
@@ -748,12 +750,12 @@ InterCode translate_Args(TreeNode tr, Operand arg_list) {
 
 
 void translate_Program(TreeNode tr) {
-	printf("translate_Program.\n");
+	//printf("translate_Program.\n");
 	codeRoot = translate_ExtDefList(tr->child);
 }
 
 InterCode translate_ExtDefList(TreeNode tr) {
-	printf("translate_ExtDefList.\n");
+	//printf("translate_ExtDefList.\n");
 	TreeNode first = tr->child;
 	if(first != NULL) {
 		InterCode code1 = translate_ExtDef(first);
@@ -766,7 +768,7 @@ InterCode translate_ExtDefList(TreeNode tr) {
 }
 
 InterCode translate_ExtDef(TreeNode tr) {
-	printf("translate_ExtDef.\n");
+	//printf("translate_ExtDef.\n");
 	TreeNode second = tr->child->next;
 	if(strcmp(second->unit, "ExtDecList") == 0) {
 		// global variable
@@ -784,11 +786,11 @@ InterCode translate_ExtDef(TreeNode tr) {
 }
 
 InterCode translate_FunDec(TreeNode tr) {
-	printf("translate_FunDec.\n");
+	//printf("translate_FunDec.\n");
 	TreeNode first = tr->child;
 	FuncNode func = check_func_table(first->name);
 	if(func == NULL) {
-		printf("Why NULL? In translate_FunDec: %s\n", first->name);
+		//printf("Why NULL? In translate_FunDec: %s\n", first->name);
 		return NULL;
 	}
 	else {
@@ -803,7 +805,7 @@ InterCode translate_FunDec(TreeNode tr) {
 }
 
 InterCode translate_VarList(TreeNode tr) {
-	printf("translate_VarList.\n");
+	//printf("translate_VarList.\n");
 	TreeNode first = tr->child;
 	InterCode res = translate_ParamDec(first);
 	if(first->next != NULL) {
@@ -814,11 +816,11 @@ InterCode translate_VarList(TreeNode tr) {
 }
 
 InterCode translate_ParamDec(TreeNode tr) {
-	printf("translate_ParamDec.\n");
+	//printf("translate_ParamDec.\n");
 	TreeNode second = tr->child->next;
 	SymNode variable = check_sym_table(second->child->name);
 	if(variable == NULL) {
-		printf("Why NULL? In translate_Dec: %s\n", second->child->name);
+		//printf("Why NULL? In translate_Dec: %s\n", second->child->name);
 		return NULL;
 	}
 	else {
@@ -828,7 +830,7 @@ InterCode translate_ParamDec(TreeNode tr) {
 }
 
 InterCode translate_Compst(TreeNode tr) {
-	printf("translate_CompSt.\n");
+	//printf("translate_CompSt.\n");
 	TreeNode second = tr->child->next;
 	TreeNode third = second->next;
 	InterCode code1 = translate_DefList(second);
@@ -837,7 +839,7 @@ InterCode translate_Compst(TreeNode tr) {
 }
 
 InterCode translate_StmtList(TreeNode tr) {
-	printf("translate_StmtList.\n");
+	//printf("translate_StmtList.\n");
 	TreeNode first = tr->child;
 	if(first != NULL) {
 		InterCode code1 = translate_Stmt(first);
@@ -850,7 +852,7 @@ InterCode translate_StmtList(TreeNode tr) {
 }
 
 InterCode translate_DefList(TreeNode tr) {
-	printf("translate_DefList.\n");
+	//printf("translate_DefList.\n");
 	TreeNode first = tr->child;
 	if(first != NULL) {
 		InterCode code1 = translate_Def(first);
@@ -863,12 +865,12 @@ InterCode translate_DefList(TreeNode tr) {
 }
 
 InterCode translate_Def(TreeNode tr) {
-	printf("translate_Def.\n");
+	//printf("translate_Def.\n");
 	return translate_DecList(tr->child->next);
 }
 
 InterCode translate_DecList(TreeNode tr) {
-	printf("translate_DecList.\n");
+	//printf("translate_DecList.\n");
 	TreeNode first = tr->child;
 	InterCode code = translate_Dec(first);
 	if(first->next != NULL) {
@@ -878,7 +880,7 @@ InterCode translate_DecList(TreeNode tr) {
 }
 
 InterCode translate_Dec(TreeNode tr) {
-	printf("translate_Dec.\n");
+	//printf("translate_Dec.\n");
 	TreeNode first = tr->child;
 	if(first->next == NULL) {
 		return NULL;
@@ -888,7 +890,7 @@ InterCode translate_Dec(TreeNode tr) {
 		// For the time being, assume VarDec -> ID
 		SymNode variable = check_sym_table(first->child->name);
 		if(variable == NULL) {
-			printf("Why NULL? In translate_Dec: %s\n", first->child->name);
+			////printf("Why NULL? In translate_Dec: %s\n", first->child->name);
 			return NULL;
 		}
 		else {
@@ -944,7 +946,7 @@ void print_op(Operand op) {
 	}
 	//fputs("NO",fp);
 	////fcose(fp);
-	//printf("OK!");
+	////printf("OK!");
 }
 
 void print_code(InterCode code) {
@@ -1216,7 +1218,7 @@ void print_code(InterCode code) {
 	}
 	//fputs("OK",fp);
 	//fcose(fp);
-	//printf("OK!\n");
+	////printf("OK!\n");
 }
 
 void print_codeTree() {
@@ -1225,7 +1227,7 @@ void print_codeTree() {
 	while(code != NULL) {
 		print_code(code);
 		code = code->next;
-		//printf("OK!\n");
+		////printf("OK!\n");
 	}
 	fclose(fp);
 }

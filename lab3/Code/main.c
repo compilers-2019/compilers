@@ -35,15 +35,15 @@ int main(int argc, char** argv) {
 		yyparse();
 		if(signal) {
 			
-			printTree();
+			//printTree();
 			
 			start(root);
-			printTable();
+			//printTable();
 			translate_Program(root);
 			strcpy(file_name, argv[2]);
-			if(codeSignal) {
-				print_codeTree();
-			}
+			print_codeTree();
+			printf("These have been written into %s.\n", file_name);
+	
 		}
 		return 0;
 
