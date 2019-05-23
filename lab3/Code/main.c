@@ -14,13 +14,14 @@ extern void yyrestart(FILE* f);
 extern void printTree();
 extern void Program(TreeNode r);
 extern bool signal;
+extern char file_name[20];
 //extern struct TreeNode* current;
 
 int main(int argc, char** argv) {
 		root = NULL;
 		signal = true;
 		//yylineno = 1;
-		if(argc <= 1) return 1;
+		if(argc <= 2) return 1;
 		FILE* f = fopen(argv[1], "r");
 		if(!f) {
 				perror(argv[1]);
@@ -38,6 +39,8 @@ int main(int argc, char** argv) {
 			start(root);
 			printTable();
 			translate_Program(root);
+
+			strcpy(file_name, argv[2]);
 			print_codeTree();
 		}
 		return 0;

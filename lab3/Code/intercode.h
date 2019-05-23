@@ -8,6 +8,10 @@
 #include <stdarg.h>
 #include "syntaxtree.h"
 #include "sym_table.h"
+
+char file_name[20];
+FILE *fp = NULL;
+
 enum R_KIND{
 		G, GE, L, LE, E, NE, 
 };
@@ -87,6 +91,8 @@ InterCode translate_ExtDefList(TreeNode tr);
 InterCode translate_ExtDef(TreeNode tr);
 
 InterCode translate_FunDec(TreeNode tr);
+InterCode translate_VarList(TreeNode tr);
+InterCode translate_ParamDec(TreeNode tr);
 
 InterCode translate_Compst(TreeNode tr);
 InterCode translate_StmtList(TreeNode tr);
