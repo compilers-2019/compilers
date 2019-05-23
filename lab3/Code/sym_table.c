@@ -650,12 +650,20 @@ SymNode Exp(TreeNode exp)
 		//Exp : Exp LB Exp RB
 		else if(strcmp(second->unit,"LB") == 0)
 		{
+			/*TreeNode third = second->next;
+
+		SymNode t = Exp(first);
+		SymNode type1 = Exp(third);*/
 			printf("Run: Exp : Exp LB Exp RB\n");
+			if(t==NULL)
+				return NULL;
 			if(t->type->kind != ARRAY)
 			{
 				printf( "Error type 10 at line %d: \"%s\" is not an array.\n", first->lineno, t->name );
 				return NULL;
 			}
+			if(type1==NULL)
+				return NULL;
 			if(type1->type->kind != BASIC || type1->type->u.basic != 0)
 			{
 				printf( "Error type 12 at line %d: \"%f\" is not an integer.\n", first->lineno , third->child->val );
@@ -663,10 +671,10 @@ SymNode Exp(TreeNode exp)
 			}
 			Type p = t->type->u.array.element;
 			res->type = p;
-			if(p->u.array.element == NULL)
+			/*if(p->u.array.element == NULL)
 			{
 				res = p->u.array.arrlist;
-			}
+			}*/
 			res->CanBeAss = true;
 			return res;
 		}
