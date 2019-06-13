@@ -2,6 +2,8 @@
 #include <stdbool.h>
 #include "syntaxtree.h"
 #include "sym_table.h"
+// #include "intercode.h"
+#include "objectcode.h"
 //#include "intercode.h"
 //#ifdef YY_DEBUG
 //extern int yydebug;
@@ -34,7 +36,6 @@ int main(int argc, char** argv) {
 //#endif
 		yyparse();
 		if(signal) {
-			
 			//printTree();
 			
 			start(root);
@@ -42,7 +43,6 @@ int main(int argc, char** argv) {
 			translate_Program(root);
 			strcpy(file_name, argv[2]);
 			print_codeTree();
-			printf("These have been written into %s.\n", file_name);
 	
 		}
 		return 0;
