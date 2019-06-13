@@ -956,15 +956,19 @@ void print_code(InterCode code) {
 	switch(code->kind) {
 		case LABEL:
 			printf("LABEL ");
-			//fputs("LABEL ",fp);
-			
+			fputs("LABEL ",fp);
+
 			print_op(code->u.single.op);
 			printf(" :\n");
 			fputs(" :\n",fp);
+			//printf(":\n");
+			//fputs(":\n",fp);
 			break;
 		case FUNC:
 			printf("FUNCTION %s :\n", code->u.func.name);
+			//printf("\t%s:\n", code->u.func.name);
 			fprintf(fp,"FUNCTION %s :\n",code->u.func.name);
+			//fprintf(fp,"\t%s:\n",code->u.func.name);
 			break;
 		case ASSIGN:			 
 			print_op(code->u.assign.result);
