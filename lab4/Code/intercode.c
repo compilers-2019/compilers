@@ -917,7 +917,7 @@ void print_op(Operand op) {
 			}
 			printf("%s", sym_table[op->u.var_no]->name);
 			//fputs(sym_table[op->u.var_no]->name,fp);
-			//fp=fopen(file_name,"a");
+			
 			fprintf(fp,"%s", sym_table[op->u.var_no]->name);
 			break;
 		case CONSTANT:
@@ -925,27 +925,27 @@ void print_op(Operand op) {
 			printf("#%d", op->u.value);
 			//fputs("#",fp);
 			//fputs(op->u.value,fp);
-			//fp=fopen(file_name,"a");
+			
 			fprintf(fp,"#%d", op->u.value);
 			break;
 		case TEMP:
 			 
 			printf("%s", op->u.temp.name);
 			//fputs(op->u.temp.name,fp);
-			//fp=fopen(file_name,"a");
+			
 			fprintf(fp,"%s", op->u.temp.name);
 			break;
 		case O_LABEL:
 			 
 			printf("%s", op->u.label.name);
-			//fp=fopen(file_name,"a");
+			
 			fprintf(fp,"%s", op->u.label.name);
 			//fputs(op->u.label.name,fp);
 			break;
 		default: break;
 	}
 	//fputs("NO",fp);
-	////fcose(fp);
+	//
 	////printf("OK!");
 }
 
@@ -956,163 +956,127 @@ void print_code(InterCode code) {
 	switch(code->kind) {
 		case LABEL:
 			printf("LABEL ");
-			//fp=fopen(file_name,"a");
-			fputs("LABEL ",fp);
-			//fcose(fp);
+			//fputs("LABEL ",fp);
+			
 			print_op(code->u.single.op);
 			printf(" :\n");
-			//fp=fopen(file_name,"a");
 			fputs(" :\n",fp);
 			break;
 		case FUNC:
 			printf("FUNCTION %s :\n", code->u.func.name);
-			 
-			//fputs("FUNCTION ",fp);
-			//fp=fopen(file_name,"a");
 			fprintf(fp,"FUNCTION %s :\n",code->u.func.name);
-			//fputs(code->u.func.name,fp);
-			//fputs(" :\n",fp);
 			break;
-		case ASSIGN:
-			 
+		case ASSIGN:			 
 			print_op(code->u.assign.result);
 			printf(" := ");
-			//fp=fopen(file_name,"a");
 			fputs(" := ",fp);
-			//fcose(fp);
 			print_op(code->u.assign.op);
 			printf("\n");
-			//fp=fopen(file_name,"a");
 			fputs("\n",fp);
 			break;
 		case ADD:
-			 
 			print_op(code->u.binop.result);
 			printf(" := ");
-			//fp=fopen(file_name,"a");
 			fputs(" := ",fp);
-			//fcose(fp);
 			print_op(code->u.binop.op1);
 			printf(" + ");
-			//fp=fopen(file_name,"a");
 			fputs(" + ",fp);
-			//fcose(fp);
 			print_op(code->u.binop.op2);
 			printf("\n");
-			//fp=fopen(file_name,"a");
 			fputs("\n",fp);
 			break;
 		case SUB:
 			 
 			print_op(code->u.binop.result);
 			printf(" := ");	
-			//fp=fopen(file_name,"a");
 			fputs(" := ",fp);
-			//fcose(fp);
 			print_op(code->u.binop.op1);
 			printf(" - ");
-			//fp=fopen(file_name,"a");
 			fputs(" - ",fp);
-			//fcose(fp);
 			print_op(code->u.binop.op2);
 			printf("\n");
-			//fp=fopen(file_name,"a");
 			fputs("\n",fp);
 			break;
 		case MUL:
 			 
 			print_op(code->u.binop.result);
 			printf(" := ");
-			//fp=fopen(file_name,"a");
 			fputs(" := ",fp);
-			//fcose(fp);
+
 			print_op(code->u.binop.op1);
 			printf(" * ");
-			//fp=fopen(file_name,"a");
 			fputs(" * ",fp);
-			//fcose(fp);
+
 			print_op(code->u.binop.op2);
 			printf("\n");
-			//fp=fopen(file_name,"a");
 			fputs("\n",fp);
 			break;
 		case DIV:
 			 
 			print_op(code->u.binop.result);
 			printf(" := ");
-			//fp=fopen(file_name,"a");
 			fputs(" := ",fp);
-			//fcose(fp);
+
 			print_op(code->u.binop.op1);
 			printf(" / ");
-			//fp=fopen(file_name,"a");
 			fputs(" / ",fp);
-			//fcose(fp);
+
 			print_op(code->u.binop.op2);
 			printf("\n");
-			//fp=fopen(file_name,"a");
 			fputs("\n",fp);
 			break;
 		case CITE:
 			 
 			print_op(code->u.assign.result);
 			printf(" := &");
-			//fp=fopen(file_name,"a");
 			fputs(" := &",fp);
-			//fcose(fp);
 			print_op(code->u.assign.op);
 			printf("\n");
-			//fp=fopen(file_name,"a");
 			fputs("\n",fp);
 			break;
 		case GETPOINTER:
 			 
 			print_op(code->u.assign.result);
 			printf(" := *");
-			//fp=fopen(file_name,"a");
 			fputs(" := *",fp);
-			//fcose(fp);
 			print_op(code->u.assign.op);
 			printf("\n");
-			//fp=fopen(file_name,"a");
 			fputs("\n",fp);
 			break;
 		case ASSIGNPOINTER:
 			 
 			printf("*");
-			//fp=fopen(file_name,"a");
 			fputs("*",fp);
-			//fcose(fp);
+
 			print_op(code->u.assign.result);
 			printf(" := ");
-			//fp=fopen(file_name,"a");
 			fputs(" := ",fp);
-			//fcose(fp);
+			
 			print_op(code->u.assign.op);
 			printf("\n");
-			//fp=fopen(file_name,"a");
+			
 			fputs("\n",fp);
 			break;
 		case GOTO:
 			 
 			printf("GOTO ");
-			//fp=fopen(file_name,"a");
+			
 			fputs("GOTO ",fp);
-			//fcose(fp);
+			
 			print_op(code->u.single.op);
 			printf("\n");
-			//fp=fopen(file_name,"a");
+			
 			fputs("\n",fp);
 			break;
 		case IFGOTO:
 			 
 			printf("IF ");
-			//fp=fopen(file_name,"a");
+			
 			fputs("IF ",fp);
-			//fcose(fp);
+			
 			print_op(code->u.ifgoto.re1);
 			printf(" ");
-			//fp=fopen(file_name,"a");
+			
 			fputs(" ",fp);
 			switch(code->u.ifgoto.kind) {
 				case G: printf(">"); fputs(">",fp);break;
@@ -1125,100 +1089,95 @@ void print_code(InterCode code) {
 			}
 			printf(" ");
 			fputs(" ",fp);
-			//fcose(fp);
+			
 			print_op(code->u.ifgoto.re2);
 			printf(" GOTO ");
-			//fp=fopen(file_name,"a");
+			
 			fputs(" GOTO ",fp);
-			//fcose(fp);
+			
 			print_op(code->u.ifgoto.label);
 			printf("\n");
-			//fp=fopen(file_name,"a");
+			
 			fputs("\n",fp);
 			break;
 		case RETURN:
 			 
 			printf("RETURN ");
-			//fp=fopen(file_name,"a");
+			
 			fputs("RETURN ",fp);
-			//fcose(fp);
+			
 			print_op(code->u.single.op);
 			printf("\n");
-			//fp=fopen(file_name,"a");
+			
 			fputs("\n",fp);
 			break;
 		case DEC:
 			 
 			printf("DEC ");
-			//fp=fopen(file_name,"a");
+			
 			fputs("DEC ",fp);
-			//fcose(fp);
+			
 			print_op(code->u.dec.dec);
-			//fputs(" ",fp);
-			//fputs(code->u.dec.size,fp);
-			//fputs("\n",fp);
-			//fp=fopen(file_name,"a");
+			
+			
+			
+			
 			fprintf(fp," %d\n", code->u.dec.size);
 			printf(" %d\n", code->u.dec.size);
 			break;
 		case ARG:
 			 
 			printf("ARG ");
-			//fp=fopen(file_name,"a");
+			
 			fputs("ARG ",fp);
-			//fcose(fp);
+			
 			print_op(code->u.single.op);
-			//fp=fopen(file_name,"a");
+			
 			fputs("\n",fp);
 			printf("\n");
 			break;
 		case CALL:
 			 
-			print_op(code->u.call.ret);
-			//fputs(" := CALL ",fp);
-			//fputs(code->u.call.name,fp);
-			//fputs("\n",fp);
+			print_op(code->u.call.ret);		
 			printf(" := CALL %s\n", code->u.call.name);
-			//fp=fopen(file_name,"a");
+			
 			fprintf(fp," := CALL %s\n", code->u.call.name);
 			break;
 		case PARAM:
 			 
 			printf("PARAM ");
-			//fp=fopen(file_name,"a");
+			
 			fputs("PARAM ",fp);
-			//fcose(fp);
+			
 			print_op(code->u.single.op);
-			//fp=fopen(file_name,"a");
+			
 			fputs("\n",fp);
 			printf("\n");
 			break;
 		case READ:
 			printf("READ ");
-			//fp=fopen(file_name,"a");
+			
 			fputs("READ ",fp);
-			//fcose(fp);
+			
 			print_op(code->u.single.op);
 			printf("\n");
-			//fp=fopen(file_name,"a");
+			
 			fputs("\n",fp);
 			break;
 		case WRITE:
 			 
 			printf("WRITE ");
-			//fp=fopen(file_name,"a");
+			
 			fputs("WRITE ",fp);
-			//fcose(fp);
+			
 			print_op(code->u.single.op);
 			printf("\n");
-			//fp=fopen(file_name,"a");
+			
 			fputs("\n",fp);
 			break;
 		default: break;
 	}
-	//fputs("OK",fp);
-	//fcose(fp);
-	////printf("OK!\n");
+	
 }
 
 void print_codeTree() {
@@ -1227,7 +1186,6 @@ void print_codeTree() {
 	while(code != NULL) {
 		print_code(code);
 		code = code->next;
-		////printf("OK!\n");
 	}
 	fclose(fp);
 }
