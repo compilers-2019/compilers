@@ -551,7 +551,7 @@ InterCode translate_Stmt(TreeNode tr)
 		InterCode temp1=new_code(LABEL,label1);
 		//temp1->u.single.op = label1;
 		//[LABEL label2]
-		InterCode temp2=new_code(LABEL,label1);
+		InterCode temp2=new_code(LABEL,label2);
 		//temp2->u.single.op = label2;
 		//[GOTO label1]
 		InterCode temp3=new_code(GOTO,label1);
@@ -896,8 +896,8 @@ InterCode translate_Dec(TreeNode tr) {
 		else {
 			Operand v1 = new_op(VARIABLE, variable->no);
 			Operand t1 = new_temp();
-			InterCode code2 = translate_Exp(first->next->next, t1);
-			InterCode code1 = new_code(ASSIGN, v1, t1);
+			InterCode code1 = translate_Exp(first->next->next, t1);
+			InterCode code2 = new_code(ASSIGN, v1, t1);
 			return merge_code(2, code1, code2);
 		}
 	}

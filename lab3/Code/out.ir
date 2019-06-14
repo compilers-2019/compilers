@@ -1,20 +1,20 @@
 FUNCTION main :
-a := t1
 t1 := #0
-b := t2
+a := t1
 t2 := #1
-i := t3
+b := t2
 t3 := #0
+i := t3
 READ t4
 n := t4
 LABEL label1 :
 IF i < n GOTO label2
 GOTO label3
-LABEL label1 :
-c := t5
+LABEL label2 :
 t6 := a
 t7 := b
 t5 := t6 + t7
+c := t5
 t9 := b
 WRITE t9
 t10 := b

@@ -551,7 +551,7 @@ InterCode translate_Stmt(TreeNode tr)
 		InterCode temp1=new_code(LABEL,label1);
 		//temp1->u.single.op = label1;
 		//[LABEL label2]
-		InterCode temp2=new_code(LABEL,label1);
+		InterCode temp2=new_code(LABEL,label2);
 		//temp2->u.single.op = label2;
 		//[GOTO label1]
 		InterCode temp3=new_code(GOTO,label1);
@@ -896,8 +896,8 @@ InterCode translate_Dec(TreeNode tr) {
 		else {
 			Operand v1 = new_op(VARIABLE, variable->no);
 			Operand t1 = new_temp();
-			InterCode code2 = translate_Exp(first->next->next, t1);
-			InterCode code1 = new_code(ASSIGN, v1, t1);
+			InterCode code1 = translate_Exp(first->next->next, t1);
+			InterCode code2 = new_code(ASSIGN, v1, t1);
 			return merge_code(2, code1, code2);
 		}
 	}
@@ -949,252 +949,6 @@ void print_op(Operand op) {
 	////printf("OK!");
 }
 
-// void print_code(InterCode code) {
-// 	//printf("Start!");
-// 	//printf("code type: %d: ", code->kind);
-// 	//FILE *fp=NULL;
-// 	switch(code->kind) {
-// 		case LABEL:
-// 			printf("LABEL ");
-// 			fputs("LABEL ",fp);
-
-// 			print_op(code->u.single.op);
-// 			printf(" :\n");
-// 			fputs(" :\n",fp);
-// 			//printf(":\n");
-// 			//fputs(":\n",fp);
-// 			break;
-// 		case FUNC:
-// 			printf("FUNCTION %s :\n", code->u.func.name);
-// 			//printf("\t%s:\n", code->u.func.name);
-// 			fprintf(fp,"FUNCTION %s :\n",code->u.func.name);
-// 			//fprintf(fp,"\t%s:\n",code->u.func.name);
-// 			break;
-// 		case ASSIGN:			 
-// 			print_op(code->u.assign.result);
-// 			printf(" := ");
-// 			fputs(" := ",fp);
-// 			print_op(code->u.assign.op);
-// 			printf("\n");
-// 			fputs("\n",fp);
-// 			break;
-// 		case ADD:
-// 			print_op(code->u.binop.result);
-// 			printf(" := ");
-// 			fputs(" := ",fp);
-// 			print_op(code->u.binop.op1);
-// 			printf(" + ");
-// 			fputs(" + ",fp);
-// 			print_op(code->u.binop.op2);
-// 			printf("\n");
-// 			fputs("\n",fp);
-// 			break;
-// 		case SUB:
-			 
-// 			print_op(code->u.binop.result);
-// 			printf(" := ");	
-// 			fputs(" := ",fp);
-// 			print_op(code->u.binop.op1);
-// 			printf(" - ");
-// 			fputs(" - ",fp);
-// 			print_op(code->u.binop.op2);
-// 			printf("\n");
-// 			fputs("\n",fp);
-// 			break;
-// 		case MUL:
-			 
-// 			print_op(code->u.binop.result);
-// 			printf(" := ");
-// 			fputs(" := ",fp);
-
-// 			print_op(code->u.binop.op1);
-// 			printf(" * ");
-// 			fputs(" * ",fp);
-
-// 			print_op(code->u.binop.op2);
-// 			printf("\n");
-// 			fputs("\n",fp);
-// 			break;
-// 		case DIV:
-			 
-// 			print_op(code->u.binop.result);
-// 			printf(" := ");
-// 			fputs(" := ",fp);
-
-// 			print_op(code->u.binop.op1);
-// 			printf(" / ");
-// 			fputs(" / ",fp);
-
-// 			print_op(code->u.binop.op2);
-// 			printf("\n");
-// 			fputs("\n",fp);
-// 			break;
-// 		case CITE:
-			 
-// 			print_op(code->u.assign.result);
-// 			printf(" := &");
-// 			fputs(" := &",fp);
-// 			print_op(code->u.assign.op);
-// 			printf("\n");
-// 			fputs("\n",fp);
-// 			break;
-// 		case GETPOINTER:
-			 
-// 			print_op(code->u.assign.result);
-// 			printf(" := *");
-// 			fputs(" := *",fp);
-// 			print_op(code->u.assign.op);
-// 			printf("\n");
-// 			fputs("\n",fp);
-// 			break;
-// 		case ASSIGNPOINTER:
-			 
-// 			printf("*");
-// 			fputs("*",fp);
-
-// 			print_op(code->u.assign.result);
-// 			printf(" := ");
-// 			fputs(" := ",fp);
-			
-// 			print_op(code->u.assign.op);
-// 			printf("\n");
-			
-// 			fputs("\n",fp);
-// 			break;
-// 		case GOTO:
-			 
-// 			printf("GOTO ");
-			
-// 			fputs("GOTO ",fp);
-			
-// 			print_op(code->u.single.op);
-// 			printf("\n");
-			
-// 			fputs("\n",fp);
-// 			break;
-// 		case IFGOTO:
-			 
-// 			printf("IF ");
-			
-// 			fputs("IF ",fp);
-			
-// 			print_op(code->u.ifgoto.re1);
-// 			printf(" ");
-			
-// 			fputs(" ",fp);
-// 			switch(code->u.ifgoto.kind) {
-// 				case G: printf(">"); fputs(">",fp);break;
-// 				case GE: printf(">="); fputs(">=",fp);break;
-// 				case L: printf("<");fputs("<",fp);break;
-// 				case LE: printf("<="); fputs("<=",fp);break;
-// 				case E: printf("=="); fputs("==",fp);break;
-// 				case NE: printf("!="); fputs("!=",fp);break;
-// 				default: break;
-// 			}
-// 			printf(" ");
-// 			fputs(" ",fp);
-			
-// 			print_op(code->u.ifgoto.re2);
-// 			printf(" GOTO ");
-			
-// 			fputs(" GOTO ",fp);
-			
-// 			print_op(code->u.ifgoto.label);
-// 			printf("\n");
-			
-// 			fputs("\n",fp);
-// 			break;
-// 		case RETURN:
-			 
-// 			printf("RETURN ");
-			
-// 			fputs("RETURN ",fp);
-			
-// 			print_op(code->u.single.op);
-// 			printf("\n");
-			
-// 			fputs("\n",fp);
-// 			break;
-// 		case DEC:
-			 
-// 			printf("DEC ");
-			
-// 			fputs("DEC ",fp);
-			
-// 			print_op(code->u.dec.dec);
-			
-			
-			
-			
-// 			fprintf(fp," %d\n", code->u.dec.size);
-// 			printf(" %d\n", code->u.dec.size);
-// 			break;
-// 		case ARG:
-			 
-// 			printf("ARG ");
-			
-// 			fputs("ARG ",fp);
-			
-// 			print_op(code->u.single.op);
-			
-// 			fputs("\n",fp);
-// 			printf("\n");
-// 			break;
-// 		case CALL:
-			 
-// 			print_op(code->u.call.ret);		
-// 			printf(" := CALL %s\n", code->u.call.name);
-			
-// 			fprintf(fp," := CALL %s\n", code->u.call.name);
-// 			break;
-// 		case PARAM:
-			 
-// 			printf("PARAM ");
-			
-// 			fputs("PARAM ",fp);
-			
-// 			print_op(code->u.single.op);
-			
-// 			fputs("\n",fp);
-// 			printf("\n");
-// 			break;
-// 		case READ:
-// 			printf("READ ");
-			
-// 			fputs("READ ",fp);
-			
-// 			print_op(code->u.single.op);
-// 			printf("\n");
-			
-// 			fputs("\n",fp);
-// 			break;
-// 		case WRITE:
-			 
-// 			printf("WRITE ");
-			
-// 			fputs("WRITE ",fp);
-			
-// 			print_op(code->u.single.op);
-// 			printf("\n");
-			
-// 			fputs("\n",fp);
-// 			break;
-// 		default: break;
-// 	}
-	
-// }
-
-// void print_codeTree() {
-// 	InterCode code = codeRoot;
-// 	fp = fopen(file_name, "w");
-// 	while(code != NULL) {
-// 		print_code(code);
-// 		code = code->next;
-// 	}
-// 	fclose(fp);
-// }
-
-
 bool op_equaled(Operand op1, Operand op2) {
 	if (op1 == NULL && op2 == NULL) {
 		return true;
@@ -1207,8 +961,8 @@ bool op_equaled(Operand op1, Operand op2) {
 	}
 	else {
 		switch (op1->kind) {
-			case VARIABLE: return (op1->u.var_no == op1->u.var_no);
-			case TEMP: return (op1->u.temp.temp_no == op1->u.temp.temp_no);
+			case VARIABLE: return (op1->u.var_no == op2->u.var_no);
+			case TEMP: return (op1->u.temp.temp_no == op2->u.temp.temp_no);
 			default: return false;
 		}
 	}
@@ -1234,6 +988,11 @@ Register search_reg(Operand op) {
     for (int i = 0; i < REG_T; i++) {
         if (op_equaled(op, t_list[i]->op)) {
             return t_list[i];
+        }
+    }
+	for (int i = 0; i < REG_S; i++) {
+        if (op_equaled(op, s_list[i]->op)) {
+            return s_list[i];
         }
     }
     return NULL;
@@ -1296,12 +1055,30 @@ bool op_used(Operand op, InterCode code) {
     while (cur != code) {
         cur = cur->next;
     }
-    while ((cur != NULL) && (cur->kind != FUNC)) {
+	InterCode temp = cur;
+    while ((cur != NULL) && (cur->kind != FUNC) && (cur->next != temp)) {
         if (op_existed(op, cur)) {
             return true;
         }
+		cur = cur->next;
     }
     return false;
+}
+
+char* clear_reg(Operand op, InterCode code) {
+	for (int i = 0; i < REG_T; i++) {
+		if (!op_used(t_list[i]->op, code)) {
+			t_list[i]->op = op;
+			return t_list[i]->name;
+		}
+	}
+
+	for (int i = 0; i < REG_S; i++) {
+		if (!op_used(s_list[i]->op, code)) {
+			s_list[i]->op = op;
+			return t_list[i]->name;
+		}
+	}
 }
 
 char* regT(Operand op, InterCode code) {
@@ -1311,40 +1088,19 @@ char* regT(Operand op, InterCode code) {
             // find an empty regT
             t_list[i]->if_used = true;
             t_list[i]->op = op;
-			printf("Used reg: %s\n", t_list[i]->name);
+			print_op(op);
+			printf(" use reg: %s\n", t_list[i]->name);
             return t_list[i]->name;
         }
     }
 
-	printf("Not found.\n");
-	for (int i = 0; i < REG_T; i++) {
-		printf("??\n");
-		print_op(t_list[i]->op);
-	}
-
-    // clear some regT
-    for (int i = 0; i < REG_T; i++) {
-        if (!op_used(t_list[i]->op, code)) {
-            // this op is no longer used
-            Operand temp = t_list[i]->op;
-            switch (temp->kind) {
-                case O_LABEL:
-                case CONSTANT:
-                    return "WTF???";
-                case VARIABLE: // save variable
-                case TEMP: 
-                    t_list[i]->op = op;
-                    return t_list[i]->name;
-            }
-        }
-    }
-
-    return "FULL";
+    return regS(op, code);
 }
 
 char* reg(Operand op, InterCode code) {
     Register reg = search_reg(op);
     if (reg != NULL) {
+		printf("Find: %s\n", reg->name);
         return reg->name;
     }
     else {
@@ -1363,24 +1119,7 @@ char* regS(Operand op, InterCode code) {
         }
     }
 
-    // clear some regS
-    for (int i = 0; i < REG_S; i++) {
-        if (!op_used(s_list[i]->op, code)) {
-            // this op is no longer used
-            Operand temp = s_list[i]->op;
-            switch (temp->kind) {
-                case O_LABEL:
-                case CONSTANT:
-                    return "WTF???";
-                case VARIABLE: // save variable
-                case TEMP: 
-                    s_list[i]->op = op;
-                    return s_list[i]->name;
-            }
-        }
-    }
-
-    return "FULL";
+    return clear_reg(op, code);
 }
 
 void sw_live_T(InterCode code) {
@@ -1493,7 +1232,7 @@ void print_code(InterCode code) {
                 switch (code->u.assign.op->kind)
                 {
                 case CONSTANT:
-                    fprintf(fp,"\tli %s , %d\n",result,code->u.assign.op->u.value);
+                    fprintf(fp,"\tli $%s, %d\n",result,code->u.assign.op->u.value);
                     break;
                 case VARIABLE:
 				case TEMP:
@@ -1501,11 +1240,11 @@ void print_code(InterCode code) {
                     strcpy(op, reg(code->u.assign.op,code));
                     if(code->u.assign.op->if_pointer==false&&code->u.assign.op->if_address==false)
                     {
-                        fprintf(fp,"\tmove %s, %s\n",result,op);
+                        fprintf(fp,"\tmove $%s, $%s\n",result,op);
                     }
                     else if(code->u.assign.op->if_pointer==true||code->u.assign.result->if_address==true) 
                     {
-                        fprintf(fp,"\tlw %s, 0(%s)\n",result,op);
+                        fprintf(fp,"\tlw $%s, 0(%s)\n",result,op);
                     }        
                     break;
                     }
@@ -1520,13 +1259,13 @@ void print_code(InterCode code) {
                 switch (code->u.assign.op->kind)
                 {
                 case CONSTANT:
-                    fprintf(fp,"\tsw %d , 0(%s)\n",code->u.assign.op->u.value,result);
+                    fprintf(fp,"\tsw %d, 0(%s)\n",code->u.assign.op->u.value,result);
                     break;
                 case VARIABLE:
 				case TEMP:
                     {char op[5];
                     strcpy(op, reg(code->u.assign.op,code));
-                        fprintf(fp,"\tsw %s, 0(%s)\n",op,result);    
+                        fprintf(fp,"\tsw $%s, 0(%s)\n",op,result);    
                     break;}
                 default:
                     break;
@@ -1540,19 +1279,19 @@ void print_code(InterCode code) {
             //char *result=reg(code->u.binop.result,code);
             if(code->u.binop.op1->kind==CONSTANT&&code->u.binop.op2->kind==CONSTANT)
             {
-                fprintf(fp,"\taddi %s, %d, %d\n",result,code->u.binop.op1->u.value,code->u.binop.op2->u.value);
+                fprintf(fp,"\taddi $%s, %d, %d\n",result,code->u.binop.op1->u.value,code->u.binop.op2->u.value);
             }
             else if(code->u.binop.op1->kind==CONSTANT&&(code->u.binop.op2->kind==VARIABLE||code->u.binop.op2->kind==TEMP))
             {
                 char op2[5];
                 strcpy(op2,reg(code->u.binop.op2,code));
-                fprintf(fp,"\taddi %s, %d, %s\n",result,code->u.binop.op1->u.value,op2);
+                fprintf(fp,"\taddi $%s, %d, $%s\n",result,code->u.binop.op1->u.value,op2);
             }
             else if(code->u.binop.op2->kind==CONSTANT&&(code->u.binop.op1->kind==VARIABLE||code->u.binop.op1->kind==TEMP))
             {
                 char op1[5];
                 strcpy(op1,reg(code->u.binop.op1,code));
-                fprintf(fp,"\taddi %s, %s, %d\n",result,op1,code->u.binop.op2->u.value);
+                fprintf(fp,"\taddi $%s, $%s, %d\n",result,op1,code->u.binop.op2->u.value);
             }
             else if((code->u.binop.op1->kind==VARIABLE||code->u.binop.op1->kind==TEMP)&&(code->u.binop.op2->kind==VARIABLE||code->u.binop.op2->kind==TEMP))
             {
@@ -1560,7 +1299,7 @@ void print_code(InterCode code) {
                 strcpy(op1,reg(code->u.binop.op1,code));
                 char op2[5];
                 strcpy(op2,reg(code->u.binop.op2,code));
-                fprintf(fp,"\tadd %s, %s, %s\n",result,op1,op2);
+                fprintf(fp,"\tadd $%s, $%s, $%s\n",result,op1,op2);
             }
 			break;}
 		case SUB:
@@ -1569,19 +1308,19 @@ void print_code(InterCode code) {
             strcpy(result, reg(code->u.binop.result,code));
             if(code->u.binop.op1->kind==CONSTANT&&code->u.binop.op2->kind==CONSTANT)
             {
-                fprintf(fp,"\taddi %s, %d, %d\n",result,code->u.binop.op1->u.value,-code->u.binop.op2->u.value);
+                fprintf(fp,"\taddi $%s, %d, %d\n",result,code->u.binop.op1->u.value,-code->u.binop.op2->u.value);
             }
             else if(code->u.binop.op1->kind==CONSTANT&&(code->u.binop.op2->kind==VARIABLE||code->u.binop.op2->kind==TEMP))
             {
                 char op2[5];
                 strcpy(op2,reg(code->u.binop.op2,code));
-                fprintf(fp,"\tsub %s, %d, %s\n",result,code->u.binop.op1->u.value,op2);
+                fprintf(fp,"\tsub $%s, %d, $%s\n",result,code->u.binop.op1->u.value,op2);
             }
             else if(code->u.binop.op2->kind==CONSTANT&&(code->u.binop.op1->kind==VARIABLE||code->u.binop.op1->kind==TEMP))
             {
                 char op1[5];
                 strcpy(op1,reg(code->u.binop.op1,code));
-                fprintf(fp,"\taddi %s, %s, %d\n",result,op1,-code->u.binop.op2->u.value);
+                fprintf(fp,"\taddi $%s, $%s, %d\n",result,op1,-code->u.binop.op2->u.value);
             }
             else if((code->u.binop.op1->kind==VARIABLE||code->u.binop.op1->kind==TEMP)&&(code->u.binop.op2->kind==VARIABLE||code->u.binop.op2->kind==TEMP))
             {
@@ -1589,7 +1328,7 @@ void print_code(InterCode code) {
                 strcpy(op1,reg(code->u.binop.op1,code));
                 char op2[5];
                 strcpy(op2,reg(code->u.binop.op2,code));
-                fprintf(fp,"\tsub %s, %s, %s\n",result,op1,op2);
+                fprintf(fp,"\tsub $%s, $%s, $%s\n",result,op1,op2);
             }
 			break;
             }
@@ -1599,19 +1338,19 @@ void print_code(InterCode code) {
             strcpy(result, reg(code->u.binop.result,code));
             if(code->u.binop.op1->kind==CONSTANT&&code->u.binop.op2->kind==CONSTANT)
             {
-                fprintf(fp,"\tmul %s, %d, %d\n",result,code->u.binop.op1->u.value,code->u.binop.op2->u.value);
+                fprintf(fp,"\tmul $%s, %d, %d\n",result,code->u.binop.op1->u.value,code->u.binop.op2->u.value);
             }
             else if(code->u.binop.op1->kind==CONSTANT&&(code->u.binop.op2->kind==VARIABLE||code->u.binop.op2->kind==TEMP))
             {
                 char op2[5];
                 strcpy(op2,reg(code->u.binop.op2,code));
-                fprintf(fp,"\tmul %s, %d, %s\n",result,code->u.binop.op1->u.value,op2);
+                fprintf(fp,"\tmul $%s, %d, $%s\n",result,code->u.binop.op1->u.value,op2);
             }
             else if(code->u.binop.op2->kind==CONSTANT&&(code->u.binop.op1->kind==VARIABLE||code->u.binop.op1->kind==TEMP))
             {
                 char op1[5];
                 strcpy(op1,reg(code->u.binop.op1,code));
-                fprintf(fp,"\tmul %s, %s, %d\n",result,op1,-code->u.binop.op2->u.value);
+                fprintf(fp,"\tmul $%s, $%s, %d\n",result,op1,-code->u.binop.op2->u.value);
             }
             else if((code->u.binop.op1->kind==VARIABLE||code->u.binop.op1->kind==TEMP)&&(code->u.binop.op2->kind==VARIABLE||code->u.binop.op2->kind==TEMP))
             {
@@ -1619,7 +1358,7 @@ void print_code(InterCode code) {
                 strcpy(op1,reg(code->u.binop.op1,code));
                 char op2[5];
                 strcpy(op2,reg(code->u.binop.op2,code));
-                fprintf(fp,"\tmul %s, %s, %s\n",result,op1,op2);
+                fprintf(fp,"\tmul $%s, $%s, $%s\n",result,op1,op2);
             }
 			break;
             }
@@ -1629,21 +1368,21 @@ void print_code(InterCode code) {
             if(code->u.binop.op1->kind==CONSTANT&&code->u.binop.op2->kind==CONSTANT)
             {
                 fprintf(fp,"\tdiv %d, %d\n",code->u.binop.op1->u.value,code->u.binop.op2->u.value);
-                fprintf(fp,"\tmflo %s\n",result);
+                fprintf(fp,"\tmflo $%s\n",result);
             }
             else if(code->u.binop.op1->kind==CONSTANT&&(code->u.binop.op2->kind==VARIABLE||code->u.binop.op2->kind==TEMP))
             {
                 char op2[5];
                 strcpy(op2,reg(code->u.binop.op2,code));
-                fprintf(fp,"\tdiv %d, %s\n",code->u.binop.op1->u.value,op2);
-                fprintf(fp,"\tmflo %s\n",result);
+                fprintf(fp,"\tdiv %d, $%s\n",code->u.binop.op1->u.value,op2);
+                fprintf(fp,"\tmflo $%s\n",result);
             }
             else if(code->u.binop.op2->kind==CONSTANT&&(code->u.binop.op1->kind==VARIABLE||code->u.binop.op1->kind==TEMP))
             {
                 char op1[5];
                 strcpy(op1,reg(code->u.binop.op1,code));
-                fprintf(fp,"\tdiv %s, %d\n",op1,-code->u.binop.op2->u.value);
-                fprintf(fp,"\tmflo %s\n",result);
+                fprintf(fp,"\tdiv $%s, %d\n",op1,-code->u.binop.op2->u.value);
+                fprintf(fp,"\tmflo $%s\n",result);
             }
             else if((code->u.binop.op1->kind==VARIABLE||code->u.binop.op1->kind==TEMP)&&(code->u.binop.op2->kind==VARIABLE||code->u.binop.op2->kind==TEMP))
             {
@@ -1651,8 +1390,8 @@ void print_code(InterCode code) {
                 strcpy(op1,reg(code->u.binop.op1,code));
                 char op2[5];
                 strcpy(op2,reg(code->u.binop.op2,code));
-                fprintf(fp,"\tdiv %s, %s\n",op1,op2);
-                fprintf(fp,"\tmflo %s\n",result);
+                fprintf(fp,"\tdiv $%s, $%s\n",op1,op2);
+                fprintf(fp,"\tmflo $%s\n",result);
             }
 			break;
 		case CITE:
@@ -1734,7 +1473,7 @@ void print_code(InterCode code) {
             {
                 char op2[5];
                 strcpy(op2,reg(code->u.ifgoto.re2,code));
-                fprintf(fp,"%d, %s, %s\n",code->u.ifgoto.re1->u.value,op2,code->u.ifgoto.label->u.label.name);
+                fprintf(fp,"%d, $%s, %s\n",code->u.ifgoto.re1->u.value,op2,code->u.ifgoto.label->u.label.name);
                 //fprintf(fp,"\tmul %s, %d, %s\n",result,code->u.ifgoto.re1->u.value,op2);
             }
             else if(code->u.ifgoto.re2->kind==CONSTANT&&(code->u.ifgoto.re1->kind==VARIABLE||code->u.ifgoto.re1->kind==TEMP))
@@ -1742,7 +1481,7 @@ void print_code(InterCode code) {
                 char op1[5];
                 strcpy(op1,reg(code->u.ifgoto.re1,code));
                 //fprintf(fp,"\tmul %s, %s, %d\n",result,op1,-code->u.ifgoto.re2->u.value);
-                fprintf(fp,"%s, %d, %s\n",op1,code->u.ifgoto.re2->u.value,code->u.ifgoto.label->u.label.name);
+                fprintf(fp,"$%s, %d, %s\n",op1,code->u.ifgoto.re2->u.value,code->u.ifgoto.label->u.label.name);
             }
             else if((code->u.ifgoto.re1->kind==VARIABLE||code->u.ifgoto.re1->kind==TEMP)&&(code->u.ifgoto.re2->kind==VARIABLE||code->u.ifgoto.re2->kind==TEMP))
             {
@@ -1751,7 +1490,7 @@ void print_code(InterCode code) {
                 char op2[5];
                 strcpy(op2,reg(code->u.ifgoto.re2,code));
                 //fprintf(fp,"\tmul %s, %s, %s\n",result,op1,op2);
-                fprintf(fp,"%s, %s, %s\n",op1,op2,code->u.ifgoto.label->u.label.name);
+                fprintf(fp,"$%s, $%s, %s\n",op1,op2,code->u.ifgoto.label->u.label.name);
             }
 			break;
 		case RETURN:
@@ -1761,7 +1500,7 @@ void print_code(InterCode code) {
                 char op[5];
                 strcpy(op,reg(code->u.single.op,code));
                 //char *op=reg(code->u.single.op,code);
-                fprintf(fp,"\tmove $v0, %s\n",op);
+                fprintf(fp,"\tmove $v0, $%s\n",op);
                 fprintf(fp,"\tjr $ra\n");
             }
             else
@@ -1800,7 +1539,7 @@ void print_code(InterCode code) {
             else {
                 fprintf(fp, "\taddi $sp, $sp, 4\n");
             }
-            fprintf(fp, "\tmove %s, $v0\n", reg(code->u.call.ret, code));
+            fprintf(fp, "\tmove $%s, $v0\n", reg(code->u.call.ret, code));
             lw_live_T(code);
 			break;
 		case PARAM:		 
@@ -1829,10 +1568,11 @@ void print_code(InterCode code) {
             else {
                 fprintf(fp, "\taddi $sp, $sp, 4\n");
             }
-            fprintf(fp, "\tmove %s, $v0\n", reg(code->u.call.ret, code));
+            fprintf(fp, "\tmove $%s, $v0\n", reg(code->u.call.ret, code));
 			break;
 		case WRITE:
 			printf("Run: WRITE\n");
+			fprintf(fp, "\tmove $a0, $%s\n", reg(code->u.single.op, code));
 			if (func) {
                 fprintf(fp, "\tsw $ra, %d($sp)\n", param_num * 4);
             }
@@ -1863,7 +1603,7 @@ void print_codeTree() {
 	InterCode code = codeRoot;
 	fp = fopen(file_name, "w");
     fprintf(fp,".data\n_prompt: .asciiz \"Enter an integer:\"\n");
-    fprintf(fp,"_ret: .asciiz \"\\n\"\n.globl main\n.text\nread:\n\tli $v0, 4\n\tla $a0, _prompt\n\tsyscall\n\tli $s0, _prompt\n\tsyscall\n\tjr $ra\n\nwrite:\n\tli $v0, 1\n\tsyscall\n\tli $v0, 4\n\tla $a0, _ret\n\tsyscall\n\tmove $v0, $0\n\tjr $ra\n\n");
+    fprintf(fp,"_ret: .asciiz \"\\n\"\n.globl main\n.text\nread:\n\tli $v0, 4\n\tla $a0, _prompt\n\tsyscall\n\tli $v0, 5\n\tsyscall\n\tjr $ra\n\nwrite:\n\tli $v0, 1\n\tsyscall\n\tli $v0, 4\n\tla $a0, _ret\n\tsyscall\n\tmove $v0, $0\n\tjr $ra\n\n");
 	// fclose(fp);
 
 	while(code != NULL) {

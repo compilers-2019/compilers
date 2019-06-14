@@ -39,22 +39,22 @@ label1:
 label2:
 	move $t8, $t1
 	move $t9, $t3
-	add $s0, $t8, $t9
-	move $s1, $s0
-	move $s2, $t3
-	move $a0, $s2
+	add $t0, $t8, $t9
+	move $t1, $t0
+	move $t0, $t3
+	move $a0, $t0
 	addi $sp, $sp, -4
 	sw $ra, 0($sp)
 	jal write
 	addi $sp, $sp, 4
-	move $s3, $t3
-	move $t1, $s3
-	move $s4, $s1
-	move $t3, $s4
-	move $s5, $t5
-	li $s6, 1
-	add $s7, $s5, $s6
-	move $t5, $s7
+	move $t0, $t3
+	move $t2, $t0
+	move $t0, $t1
+	move $t3, $t0
+	move $t0, $t5
+	li $t1, 1
+	add $t2, $t0, $t1
+	move $t5, $t2
 	j label1
 label3:
 	li $t0, 0
